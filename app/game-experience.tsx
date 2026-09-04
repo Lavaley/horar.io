@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type {
   CSSProperties,
   PointerEvent as ReactPointerEvent,
@@ -253,7 +254,78 @@ type AnalogClockProps = {
     score: number;
   } | null;
   onTimeChange: (minutes: number, preserveHands?: boolean) => void;
+  onTick: () => void;
 };
+
+function useMechanicalTick() {
+  const audioContext = useRef<AudioContext | null>(null);
+  const tickBuffer = useRef<AudioBuffer | null>(null);
+  const activeSources = useRef(new Set<AudioBufferSourceNode>());
+  const lastTickAt = useRef(0);
+
+  useEffect(() => {
+    const sources = activeSources.current;
+
+    return () => {
+      sources.forEach((source) => source.stop());
+      sources.clear();
+      if (audioContext.current) void audioContext.current.close();
+    };
+  }, []);
+
+  function getAudioContext() {
+    if (audioContext.current) return audioContext.current;
+
+    const context = new AudioContext({ latencyHint: "interactive" });
+    const sampleCount = Math.floor(context.sampleRate * 0.045);
+    const buffer = context.createBuffer(1, sampleCount, context.sampleRate);
+    const samples = buffer.getChannelData(0);
+
+    for (let index = 0; index < sampleCount; index += 1) {
+      const time = index / context.sampleRate;
+      const noise = Math.random() * 2 - 1;
+      const click = Math.sin(2 * Math.PI * 1850 * time);
+      samples[index] =
+        (noise * 0.52 + click * 0.48) * Math.exp(-time * 115);
+    }
+
+    audioContext.current = context;
+    tickBuffer.current = buffer;
+    return context;
+  }
+
+  return function playTick() {
+    const now = performance.now();
+    if (now - lastTickAt.current < 42 || activeSources.current.size >= 5) return;
+    lastTickAt.current = now;
+
+    const context = getAudioContext();
+    const buffer = tickBuffer.current;
+    if (!buffer) return;
+
+    const start = () => {
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      source.playbackRate.value = 0.94 + Math.random() * 0.12;
+      gain.gain.value = 0.055;
+      source.connect(gain).connect(context.destination);
+      activeSources.current.add(source);
+      source.onended = () => {
+        activeSources.current.delete(source);
+        source.disconnect();
+        gain.disconnect();
+      };
+      source.start();
+    };
+
+    if (context.state === "suspended") {
+      void context.resume().then(start).catch(() => undefined);
+    } else {
+      start();
+    }
+  };
+}
 
 function ScoreRadial({
   correctTime,
@@ -330,12 +402,14 @@ function AnalogClock({
   isLocked,
   scoreVisualization,
   onTimeChange,
+  onTick,
 }: AnalogClockProps) {
   const clockElement = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<{
     hand: Hand;
     lastPointerAngle: number;
     unwrappedMinutes: number;
+    lastTickMinute: number;
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -367,7 +441,12 @@ function AnalogClock({
     drag.lastPointerAngle = currentPointerAngle;
     drag.unwrappedMinutes +=
       drag.hand === "minute" ? angleDelta / 6 : angleDelta * 2;
-    onTimeChange(Math.round(drag.unwrappedMinutes));
+    const nextMinutes = Math.round(drag.unwrappedMinutes);
+    if (normalizeMinutes(nextMinutes) !== normalizeMinutes(drag.lastTickMinute)) {
+      drag.lastTickMinute = nextMinutes;
+      onTick();
+    }
+    onTimeChange(nextMinutes);
   }
 
   function beginDrag(
@@ -388,7 +467,9 @@ function AnalogClock({
         element.getBoundingClientRect(),
       ),
       unwrappedMinutes: time,
+      lastTickMinute: time,
     };
+    onTick();
     setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -461,6 +542,137 @@ function AnalogClock({
   );
 }
 
+function RoundImage({ round }: { round: Round }) {
+  const scope = useRef<HTMLDivElement | null>(null);
+  const currentLayer = useRef<HTMLDivElement | null>(null);
+  const incomingLayer = useRef<HTMLDivElement | null>(null);
+  const [visibleRound, setVisibleRound] = useState(round);
+  const [incomingRound, setIncomingRound] = useState<Round | null>(null);
+
+  useLayoutEffect(() => {
+    const current = currentLayer.current;
+    if (!current) return;
+
+    const context = gsap.context(() => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        gsap.set(current, { autoAlpha: 1, scale: 1 });
+        return;
+      }
+      gsap.fromTo(
+        current,
+        { autoAlpha: 0, scale: 1.018 },
+        { autoAlpha: 1, scale: 1, duration: 0.34, ease: "power2.out" },
+      );
+    }, scope);
+
+    return () => context.revert();
+  }, []);
+
+  useEffect(() => {
+    if (round.id === visibleRound.id) return;
+    let cancelled = false;
+    const preload = new window.Image();
+    preload.src = round.image;
+
+    const showIncoming = async () => {
+      if (!preload.complete) {
+        await new Promise<void>((resolve, reject) => {
+          preload.onload = () => resolve();
+          preload.onerror = () => reject(new Error("Image preload failed"));
+        });
+      }
+      if (typeof preload.decode === "function") {
+        await preload.decode().catch(() => undefined);
+      }
+      if (!cancelled) setIncomingRound(round);
+    };
+
+    void showIncoming().catch(() => {
+      if (!cancelled) setVisibleRound(round);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [round, visibleRound.id]);
+
+  useLayoutEffect(() => {
+    const current = currentLayer.current;
+    const incoming = incomingLayer.current;
+    if (!incomingRound || !current || !incoming) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(current, { autoAlpha: 0 });
+      gsap.set(incoming, { autoAlpha: 1, scale: 1 });
+      const frame = requestAnimationFrame(() => {
+        setVisibleRound(incomingRound);
+        setIncomingRound(null);
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+
+    const context = gsap.context(() => {
+      gsap.set(incoming, { autoAlpha: 0, scale: 1.018 });
+      gsap
+        .timeline({
+          defaults: { overwrite: "auto" },
+          onComplete: () => {
+            setVisibleRound(incomingRound);
+            setIncomingRound(null);
+          },
+        })
+        .to(current, {
+          autoAlpha: 0,
+          scale: 0.99,
+          duration: 0.22,
+          ease: "power1.in",
+        })
+        .to(
+          incoming,
+          {
+            autoAlpha: 1,
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.out",
+          },
+          "-=0.12",
+        );
+    }, scope);
+
+    return () => context.revert();
+  }, [incomingRound]);
+
+  return (
+    <div ref={scope} className="photo-layers">
+      <div ref={currentLayer} className="photo-layer">
+        <Image
+          key={visibleRound.id}
+          src={visibleRound.image}
+          alt={visibleRound.alt}
+          fill
+          preload
+          unoptimized
+          sizes="(max-width: 800px) 100vw, 56vw"
+          style={{ objectPosition: visibleRound.objectPosition }}
+        />
+      </div>
+      {incomingRound ? (
+        <div ref={incomingLayer} className="photo-layer photo-layer-incoming">
+          <Image
+            key={incomingRound.id}
+            src={incomingRound.image}
+            alt={incomingRound.alt}
+            fill
+            loading="eager"
+            unoptimized
+            sizes="(max-width: 800px) 100vw, 56vw"
+            style={{ objectPosition: incomingRound.objectPosition }}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function Stepper({
   label,
   value,
@@ -512,6 +724,7 @@ function GameRound({
   onTimeChange,
   onConfirm,
   onNext,
+  onTick,
 }: {
   round: Round;
   roundIndex: number;
@@ -524,36 +737,55 @@ function GameRound({
   onTimeChange: (minutes: number, preserveHands?: boolean) => void;
   onConfirm: () => void;
   onNext: () => void;
+  onTick: () => void;
 }) {
+  const resultElement = useRef<HTMLDivElement | null>(null);
   const hour = Math.floor(selectedTime / 60);
   const minute = selectedTime % 60;
   const isLocked = isAnimating || isRevealed;
   const isLastRound = roundIndex === rounds.length - 1;
 
   function changeBy(delta: number) {
+    onTick();
     onTimeChange(selectedTime + delta);
   }
 
   function selectPeriod(isPm: boolean) {
     const currentIsPm = hour >= 12;
     if (currentIsPm !== isPm) {
+      onTick();
       onTimeChange(selectedTime + (isPm ? 720 : -720), true);
     }
   }
 
+  useLayoutEffect(() => {
+    const result = resultElement.current;
+    if (!isRevealed || !result) return;
+
+    const context = gsap.context(() => {
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      gsap.fromTo(
+        result,
+        { autoAlpha: 0, y: reducedMotion ? 0 : 8 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: reducedMotion ? 0 : 0.32,
+          ease: "power2.out",
+          overwrite: "auto",
+        },
+      );
+    }, result);
+
+    return () => context.revert();
+  }, [isRevealed, round.id]);
+
   return (
     <section className="play-card" aria-labelledby="round-title">
       <div className="round-photo">
-        <Image
-          key={`${round.id}-${round.objectPosition}`}
-          src={round.image}
-          alt={round.alt}
-          fill
-          priority
-          unoptimized
-          sizes="(max-width: 800px) 100vw, 56vw"
-          style={{ objectPosition: round.objectPosition }}
-        />
+        <RoundImage round={round} />
         <div className="photo-shade" aria-hidden="true" />
         <div className="photo-meta">
           <div>
@@ -595,6 +827,7 @@ function GameRound({
               : null
           }
           onTimeChange={onTimeChange}
+          onTick={onTick}
         />
 
         <div className="precision-controls" aria-label="Ajuste preciso do horário">
@@ -635,30 +868,33 @@ function GameRound({
           </div>
         </div>
 
-        {isAnimating ? (
-          <div className="reveal-status" role="status">
-            <span aria-hidden="true" />
-            Revelando o instante correto…
-          </div>
-        ) : null}
+        <div className="feedback-slot">
+          {isAnimating ? (
+            <div className="reveal-status" role="status">
+              <span aria-hidden="true" />
+              Revelando o instante correto…
+            </div>
+          ) : null}
 
-        {isRevealed && roundScore !== null && chosenTime !== null ? (
-          <div
-            className="round-result"
-            aria-live="polite"
-            style={{ "--score-color": scoreColor(roundScore) } as CSSProperties}
-          >
-            <div className="round-result-copy">
-              <span>Horário correto</span>
-              <strong>{formatTime(round.correctMinutes)}</strong>
-              <p>Você marcou {formatTime(chosenTime)}</p>
+          {isRevealed && roundScore !== null && chosenTime !== null ? (
+            <div
+              ref={resultElement}
+              className="round-result"
+              aria-live="polite"
+              style={{ "--score-color": scoreColor(roundScore) } as CSSProperties}
+            >
+              <div className="round-result-copy">
+                <span>Horário correto</span>
+                <strong>{formatTime(round.correctMinutes)}</strong>
+                <p>Você marcou {formatTime(chosenTime)}</p>
+              </div>
+              <div className="round-points">
+                <strong>{roundScore}</strong>
+                <span>pontos</span>
+              </div>
             </div>
-            <div className="round-points">
-              <strong>{roundScore}</strong>
-              <span>pontos</span>
-            </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
 
         <button
           className="confirm-button"
@@ -789,6 +1025,7 @@ export default function GameExperience() {
   const answerLocked = useRef(false);
   const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrame = useRef<number | null>(null);
+  const playTick = useMechanicalTick();
 
   useEffect(() => {
     return () => {
@@ -799,6 +1036,14 @@ export default function GameExperience() {
 
   useEffect(() => {
     mainElement.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [roundIndex, screen]);
+
+  useEffect(() => {
+    if (screen !== "playing") return;
+    const nextRound = rounds[roundIndex + 1];
+    if (!nextRound) return;
+    const preload = new window.Image();
+    preload.src = nextRound.image;
   }, [roundIndex, screen]);
 
   const currentRound = rounds[roundIndex];
@@ -914,6 +1159,7 @@ export default function GameExperience() {
           onTimeChange={chooseTime}
           onConfirm={confirmAnswer}
           onNext={nextRound}
+          onTick={playTick}
         />
       ) : null}
       {screen === "summary" ? (

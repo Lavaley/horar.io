@@ -477,9 +477,26 @@ a:focus-visible {
   background: #06131d;
 }
 
-.round-photo > img {
+.photo-layers,
+.photo-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.photo-layers {
+  overflow: hidden;
+}
+
+.photo-layer {
+  will-change: opacity, transform;
+}
+
+.photo-layer > img {
   object-fit: cover;
-  animation: photo-arrive 0.9s ease-out both;
+}
+
+.photo-layer-incoming {
+  z-index: 1;
 }
 
 .photo-shade {
@@ -896,9 +913,17 @@ a:focus-visible {
   opacity: 0.58;
 }
 
+.feedback-slot {
+  position: relative;
+  width: 100%;
+  height: 6.5rem;
+  flex: 0 0 6.5rem;
+}
+
 .reveal-status {
+  position: absolute;
+  inset: 0;
   display: flex;
-  min-height: 3rem;
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
@@ -918,7 +943,10 @@ a:focus-visible {
 
 .round-result {
   --score-color: var(--accent-bright);
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -929,7 +957,8 @@ a:focus-visible {
   background:
     linear-gradient(110deg, color-mix(in srgb, var(--score-color) 11%, transparent), transparent 60%),
     rgba(4, 17, 26, 0.58);
-  animation: result-arrive 0.38s ease-out both;
+  box-sizing: border-box;
+  will-change: opacity, transform;
 }
 
 .round-result-copy {
@@ -1191,28 +1220,6 @@ a:focus-visible {
   50% {
     opacity: 1;
     transform: scale(1.18);
-  }
-}
-
-@keyframes photo-arrive {
-  from {
-    opacity: 0.5;
-    transform: scale(1.035);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes result-arrive {
-  from {
-    opacity: 0;
-    transform: translateY(0.35rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -1533,7 +1540,7 @@ a:focus-visible {
   .clock-hand,
   .score-radial,
   .round-result,
-  .round-photo > img,
+  .photo-layer,
   .reveal-status > span {
     transition: none;
     animation: none;
