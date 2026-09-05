@@ -1,0 +1,10 @@
+[
+  { "file": "originals/01.jpeg", "correctTime": "11:05", "objectPosition": "center 58%" },
+  { "file": "originals/02.jpeg", "correctTime": "11:20", "objectPosition": "center 62%" },
+  { "file": "originals/03.jpeg", "correctTime": "05:10", "objectPosition": "center 48%" },
+  { "file": "originals/04.jpeg", "correctTime": "13:21", "objectPosition": "center 55%" },
+  { "file": "originals/05.jpeg", "correctTime": "13:45", "objectPosition": "center 56%" },
+  { "file": "originals/06.jpeg", "correctTime": "18:04", "objectPosition": "center 46%" },
+  { "file": "originals/07.jpeg", "correctTime": "12:07", "objectPosition": "center 60%" },
+  { "file": "originals/08.jpeg", "correctTime": "18:06", "objectPosition": "center 54%" }
+]
