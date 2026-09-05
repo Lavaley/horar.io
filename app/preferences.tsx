@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { copy, type Language } from "@/lib/i18n";
 import { periodAt, type Theme } from "@/lib/daily";
+import ClockTutorial from "./clock-tutorial";
 
 const Preferences = createContext({ language: "pt" as Language, text: copy.pt as typeof copy[Language] });
 export const usePreferences = () => useContext(Preferences);
@@ -63,13 +64,13 @@ export default function SiteExperience({ children }: { children: React.ReactNode
   function closeRules() { dialog.current?.close(); setRulesOpen(false); help.current?.focus(); }
   return <Preferences.Provider value={{ language, text }}>
     <div className="site-shell">
-      <div className="nightscape" aria-hidden="true" />
+      <div className="landscapes" aria-hidden="true">{(["morning", "afternoon", "night", "dawn"] as const).map(period => <div key={period} className={`nightscape landscape-${period}`} />)}</div>
       <div className="star-glow star-glow-one" aria-hidden="true" />
       <div className="star-glow star-glow-two" aria-hidden="true" />
       <header className="site-header">
         <div className="preferences-controls">
           <div className="language-switch" role="group" aria-label={text.language}>
-            {(["pt", "en"] as const).map(lang => <button key={lang} lang={lang} type="button" aria-label={lang === "pt" ? "Português" : "English"} aria-pressed={language === lang} onClick={() => setLanguage(lang)}>{lang.toUpperCase()}</button>)}
+            {(["pt", "en"] as const).map(lang => <button key={lang} lang={lang === "pt" ? "pt-BR" : "en"} type="button" aria-label={lang === "pt" ? "Português do Brasil" : "English"} aria-pressed={language === lang} onClick={() => setLanguage(lang)}><span className="language-indicator" aria-hidden="true" />{lang === "pt" ? "PT-BR" : "EN"}</button>)}
           </div>
           <label className="theme-control"><span className="sr-only">{text.theme}</span>
             <select aria-label={text.theme} value={theme} onChange={event => setTheme(event.target.value as Theme)}>{Object.entries(text.themes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
@@ -83,7 +84,9 @@ export default function SiteExperience({ children }: { children: React.ReactNode
       <dialog ref={dialog} className="rules-dialog" aria-labelledby="rules-title" onCancel={event => { event.preventDefault(); closeRules(); }} onClose={() => setRulesOpen(false)} onClick={event => { if (event.target === event.currentTarget) { const r = event.currentTarget.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) closeRules(); } }}>
         <button className="modal-close" type="button" aria-label={text.close} onClick={closeRules} autoFocus>×</button>
         <h2 id="rules-title">{text.rulesTitle}</h2>
+        {rulesOpen && <ClockTutorial />}
         {text.rules.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+        <button className="start-button rules-start" type="button" onClick={closeRules}>{text.tutorialDone}</button>
       </dialog>
     </div>
   </Preferences.Provider>;
