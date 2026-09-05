@@ -1564,8 +1564,8 @@ a:focus-visible {
   --control: #08091c; --clock-face: #181632;
 }
 :root[data-period="morning"] {
-  --background: #cbdfe9; --foreground: #17384d; --muted: #486579;
-  --accent: #496b88; --accent-bright: #254d70; --line: #3a627b36;
+  --background: #cbdfe9; --foreground: #102f43; --muted: #365469;
+  --accent: #355a75; --accent-bright: #1e4663; --line: #3a627b36;
   --surface: #edf5f5e6; --surface-solid: #edf5f5; --panel: #e4f0f3;
   --control: #dceaf0; --clock-face: #f0f6f6; --button-ink: #f5f9fc;
   color-scheme: light;
@@ -1738,3 +1738,19 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 }
 .tutorial-dial .hour-hand { height: 27%; }
 .tutorial-dial .minute-hand { height: 37%; }
+
+/* Morning keeps blue ink on light panels and light lettering over photography. */
+:root[data-period="morning"] .photo-meta h1,
+:root[data-period="morning"] .photo-credit {
+  color: #f3f9ff;
+  text-shadow: 0 1px 3px #102f43, 0 2px 10px #102f43cc;
+}
+:root[data-period="morning"] .photo-meta > div p {
+  color: #dceeff;
+  text-shadow: 0 1px 3px #102f43, 0 2px 8px #102f43cc;
+}
+:root[data-period="morning"] .site-footer,
+:root[data-period="morning"] .footer-motto {
+  color: #edf6ff;
+  text-shadow: 0 1px 4px #102f43, 0 2px 8px #102f4399;
+}
