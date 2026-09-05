@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { convexTest } from "convex-test";
+import aggregateTest from "@convex-dev/aggregate/test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
 import { scoreGuess } from "../convex/scoring";
@@ -13,6 +14,7 @@ async function setup() {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-09-05T15:00:00Z"));
   const t = convexTest(schema, modules);
+  aggregateTest.register(t, "dailyRanking");
   const id = await t.run(ctx => ctx.db.insert("photographs", { image: { provider: "external", url: "https://example.com/photo.jpg" }, challengeDate: "2026-09-05", correctMinutes: 665 }));
   return { t, id };
 }
@@ -72,7 +74,9 @@ describe("Convex daily game", () => {
     vi.setSystemTime(new Date("2026-09-06T03:00:00Z"));
     expect((await t.mutation(api.challenges.current, {})).photo?.id).toBe(nextId);
     expect(await t.mutation(api.challenges.submit, { playerToken, date: first.date, photographId: id, chosenMinutes: 10 })).toEqual(first);
-    expect((await t.mutation(api.challenges.submit, { playerToken, date: "2026-09-06", photographId: nextId, chosenMinutes: 600 })).score).toBe(100);
+    const next = await t.mutation(api.challenges.submit, { playerToken, date: "2026-09-06", photographId: nextId, chosenMinutes: 600 });
+    expect(next.score).toBe(100);
+    expect(next.ranking).toEqual({ position: 1, total: 1 });
   });
   it("has an honest empty state and does not repeat an old photo", async () => {
     const { t } = await setup();
@@ -85,4 +89,53 @@ describe("Convex daily game", () => {
     await expect(t.mutation(internal.admin.schedule, args)).rejects.toThrow("DATE_ALREADY_SCHEDULED");
     await expect(t.mutation(internal.admin.schedule, { ...args, challengeDate: "2026-02-30" })).rejects.toThrow("INVALID_DATE");
   });
+});
+
+describe("daily ranking", () => {
+  const tokenFor = (index: number) => `${String(index).padStart(8, "0")}-aaaa-4aaa-aaaa-aaaaaaaaaaaa`;
+
+  it("ranks by score, shares tied places, refreshes totals and never duplicates retries", async () => {
+    const { t, id } = await setup();
+    const submit = (index: number, chosenMinutes: number) => t.mutation(api.challenges.submit, { playerToken: tokenFor(index), date: "2026-09-05", photographId: id, chosenMinutes });
+    expect((await submit(1, 0)).ranking).toEqual({ position: 1, total: 1 });
+    await submit(2, 665);
+    await submit(3, 665);
+    expect((await submit(4, 605)).ranking).toEqual({ position: 3, total: 4 });
+    expect((await submit(1, 665)).ranking).toEqual({ position: 4, total: 4 });
+    expect((await submit(1, 665)).score).toBe(0);
+    expect((await t.mutation(api.challenges.result, { playerToken: tokenFor(2), date: "2026-09-05" }))?.ranking).toEqual({ position: 1, total: 4 });
+    expect(await t.mutation(api.challenges.result, { playerToken: tokenFor(9), date: "2026-09-05" })).toBeNull();
+  });
+
+  it("counts concurrent participants once and gives tied winners the same place", async () => {
+    const { t, id } = await setup();
+    const args = { date: "2026-09-05", photographId: id, chosenMinutes: 665 };
+    await Promise.all(Array.from({ length: 6 }, (_, index) => t.mutation(api.challenges.submit, { ...args, playerToken: tokenFor(index % 3) })));
+    expect((await t.mutation(api.challenges.result, { date: args.date, playerToken: tokenFor(0) }))?.ranking).toEqual({ position: 1, total: 3 });
+  });
+
+  it("backfills 1000 existing participants across pages idempotently and isolates days", async () => {
+    const { t, id } = await setup();
+    await t.run(async ctx => {
+      for (let index = 0; index < 1000; index++) {
+        await ctx.db.insert("guesses", { playerToken: tokenFor(index), date: "2026-09-05", photographId: id, chosenMinutes: 665, correctMinutes: 665, difference: 0, score: index === 0 ? 100 : 50 });
+      }
+      await ctx.db.insert("guesses", { playerToken: tokenFor(1001), date: "2026-09-04", photographId: id, chosenMinutes: 665, correctMinutes: 665, difference: 0, score: 100 });
+    });
+    for (let pass = 0; pass < 2; pass++) {
+      let cursor: string | null = null;
+      let done = false;
+      let processed = 0;
+      while (!done) {
+        const page: { cursor: string; isDone: boolean; processed: number } = await t.mutation(internal.ranking.backfill, { cursor });
+        cursor = page.cursor;
+        done = page.isDone;
+        processed += page.processed;
+      }
+      expect(processed).toBe(1001);
+    }
+    const winner = await t.mutation(api.challenges.result, { date: "2026-09-05", playerToken: tokenFor(0) });
+    expect(winner?.ranking).toEqual({ position: 1, total: 1000 });
+    expect(JSON.stringify(winner)).not.toContain("playerToken");
+  }, 30_000);
 });

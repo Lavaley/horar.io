@@ -17,7 +17,7 @@ export default defineSchema({
     creditUrl: v.optional(v.string()),
   }).index("by_date", ["challengeDate"]),
   // Anonymous, per-browser receipts make retries and concurrent tabs idempotent.
-  // No accounts, personal data, ranking, or public access to other receipts.
+  // No accounts, personal data, or public access to other receipts.
   guesses: defineTable({
     playerToken: v.string(),
     date: v.string(),

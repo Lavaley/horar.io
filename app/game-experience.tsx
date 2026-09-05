@@ -90,6 +90,11 @@ function GameRound({ game }: { game: ReturnType<typeof useDailyGame> }) {
         {shownResult && <div className="round-result" style={{ "--score-color": scoreColor(result.score) } as CSSProperties}><div className="round-result-copy"><span>{text.correct}</span><strong>{formatTime(result.correctMinutes)}</strong><p>{text.chosen} {formatTime(result.chosenMinutes)}</p><p>{result.difference === 0 ? text.exact : `${Math.floor(result.difference / 60) ? `${Math.floor(result.difference / 60)}h ` : ""}${result.difference % 60}min ${text.difference}`}</p></div><div className="round-points"><strong>{result.score}</strong><span>{text.points}</span></div></div>}
         {(error || imageFailed) && <p role="alert" className="game-error">{text[error ?? "connection"]}</p>}
       </div>
+      {shownResult && <section className="daily-ranking" aria-label={text.rankingTitle}>
+        <span>{text.rankingTitle}</span>
+        <p aria-live="polite">{result.ranking ? <>{text.rankingPosition} <strong>{result.ranking.position.toLocaleString(language === "pt" ? "pt-BR" : "en")}</strong> {text.rankingOf} <strong>{result.ranking.total.toLocaleString(language === "pt" ? "pt-BR" : "en")}</strong> {result.ranking.total === 1 ? text.rankingPlayer : text.rankingPlayers}</> : text.rankingLoading}</p>
+        <small>{text.rankingNote}</small>
+      </section>}
       {shownResult ? <ReturnTomorrow challenge={challenge} now={now} streak={game.streak} /> : <><button className="confirm-button" type="button" onClick={() => void game.submit(selectedTime)} disabled={submitting || revealing || !!result || !imageReady || imageFailed || error === "storageError" || now >= challenge.nextReleaseAt}><span>{submitting || revealing ? text.wait : pending ? text.recover : text.confirm}</span><Arrow /></button><p className="one-guess-note">{text.oneGuess}</p></>}
     </div>
   </section>;

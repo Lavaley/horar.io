@@ -12,6 +12,7 @@
     "photos:import": "node scripts/import-photos.mjs"
   },
   "dependencies": {
+    "@convex-dev/aggregate": "^0.3.1",
     "convex": "^1.45.0",
     "gsap": "^3.15.0",
     "next": "16.3.4",

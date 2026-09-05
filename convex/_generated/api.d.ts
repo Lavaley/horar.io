@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as challenges from "../challenges.js";
 import type * as images from "../images.js";
+import type * as ranking from "../ranking.js";
 import type * as scoring from "../scoring.js";
 
 import type {
@@ -23,6 +24,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   challenges: typeof challenges;
   images: typeof images;
+  ranking: typeof ranking;
   scoring: typeof scoring;
 }>;
 
@@ -52,4 +54,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  dailyRanking: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"dailyRanking">;
+};

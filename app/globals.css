@@ -1754,3 +1754,9 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
   color: #edf6ff;
   text-shadow: 0 1px 4px #102f43, 0 2px 8px #102f4399;
 }
+
+.daily-ranking { width: 100%; padding: 1rem 1.1rem; border: 1px solid var(--line); border-radius: .85rem; background: var(--control); }
+.daily-ranking > span { color: var(--muted); font-size: .875rem; }
+.daily-ranking p { margin: .45rem 0; color: var(--foreground); font-size: 1rem; line-height: 1.55; }
+.daily-ranking strong { color: var(--accent-bright); font-family: var(--font-clock); font-size: 1.2rem; }
+.daily-ranking small { display: block; color: var(--muted); font-size: .875rem; line-height: 1.5; }

@@ -4,18 +4,21 @@ import type { Doc } from "./_generated/dataModel";
 import { brasiliaDay, nextRelease } from "../lib/daily";
 import { imageUrl } from "./images";
 import { scoreGuess } from "./scoring";
+import { dailyRanking, placement, rankingValidator } from "./ranking";
+import type { MutationCtx } from "./_generated/server";
 
 const receiptValidator = v.object({
   date: v.string(), photographId: v.id("photographs"),
   chosenMinutes: v.number(), correctMinutes: v.number(),
   difference: v.number(), score: v.number(),
+  ranking: rankingValidator,
 });
 
 function checkToken(token: string) {
   if (!/^[a-f0-9-]{36}$/i.test(token)) throw new ConvexError("INVALID_PLAYER");
 }
 
-function receipt(guess: Doc<"guesses">) {
+async function receipt(ctx: MutationCtx, guess: Doc<"guesses">) {
   return {
     date: guess.date,
     photographId: guess.photographId,
@@ -23,6 +26,7 @@ function receipt(guess: Doc<"guesses">) {
     correctMinutes: guess.correctMinutes,
     difference: guess.difference,
     score: guess.score,
+    ranking: await placement(ctx, guess),
   };
 }
 
@@ -62,7 +66,7 @@ export const result = mutation({
   handler: async (ctx, args) => {
     checkToken(args.playerToken);
     const guess = await ctx.db.query("guesses").withIndex("by_player_date", q => q.eq("playerToken", args.playerToken).eq("date", args.date)).unique();
-    return guess ? receipt(guess) : null;
+    return guess ? receipt(ctx, guess) : null;
   },
 });
 
@@ -76,7 +80,7 @@ export const submit = mutation({
     }
     // Return the first receipt on retries, even if the response was lost at midnight.
     const existing = await ctx.db.query("guesses").withIndex("by_player_date", q => q.eq("playerToken", args.playerToken).eq("date", args.date)).unique();
-    if (existing) return receipt(existing);
+    if (existing) return receipt(ctx, existing);
     if (args.date !== brasiliaDay(Date.now())) throw new ConvexError("DAY_CHANGED");
     const photo = await ctx.db.get(args.photographId);
     if (!photo || photo.challengeDate !== args.date) throw new ConvexError("CHALLENGE_CHANGED");
@@ -84,7 +88,9 @@ export const submit = mutation({
       date: args.date, photographId: photo._id, chosenMinutes: args.chosenMinutes,
       correctMinutes: photo.correctMinutes, ...scoreGuess(args.chosenMinutes, photo.correctMinutes),
     };
-    await ctx.db.insert("guesses", { ...result, playerToken: args.playerToken });
-    return result;
+    const id = await ctx.db.insert("guesses", { ...result, playerToken: args.playerToken });
+    const guess = (await ctx.db.get(id))!;
+    await dailyRanking.insertIfDoesNotExist(ctx, guess);
+    return receipt(ctx, guess);
   },
 });

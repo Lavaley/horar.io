@@ -1,6 +1,6 @@
 # Horar.io
 
-Jogo diário de descobrir o horário de uma fotografia real. Next.js mantém a interface estática; Convex é o backend autoritativo. Sem conta de jogador, pistas ou ranking.
+Jogo diário de descobrir o horário de uma fotografia real. Next.js mantém a interface estática; Convex é o backend autoritativo. Sem conta de jogador ou pistas, com colocação diária após o palpite.
 
 ## Executar localmente
 
@@ -58,6 +58,10 @@ Uma data aceita apenas uma fotografia. O importador não altera um desafio publi
 O navegador grava um identificador aleatório e `horario.daily.YYYY-MM-DD` com palpite pendente, resultado e sequência. O Convex guarda recibos anônimos por identificador/data para que chamadas repetidas ou abas concorrentes devolvam o primeiro resultado. Um palpite pendente fica bloqueado e pode ser reenviado com o mesmo valor caso a resposta se perca. Não há listagem pública de recibos. Limpar os dados do navegador permite jogar novamente, como previsto no produto.
 
 A sequência mede dias consecutivos com um palpite, independentemente dos pontos. Recarregar não incrementa a sequência; deixar de jogar um dia a interrompe. Idioma, tema e visita às regras também são persistidos localmente. O navegador precisa permitir localStorage para enviar palpites.
+
+O ranking usa a pontuação calculada no servidor: posição = 1 + número de participantes com pontuação maior. Empates compartilham a posição (1, 1, 3). O total conta recibos anônimos únicos por dia, não pessoas verificadas; limpar os dados do navegador cria outro participante. Só o próprio resultado expõe a colocação e o total, nunca os recibos de terceiros. A colocação é atualizada a cada reconciliação de 30 segundos e ao retornar à aba, até o encerramento do desafio.
+
+`convex/ranking.ts` usa o componente Aggregate com uma partição por data de Brasília. A troca de fotografia começa um ranking independente, preservando o histórico sem cron destrutivo. A inserção do recibo e do ranking é atômica; reenvios não aumentam o total. Após instalar em um banco com recibos existentes, execute a função interna `ranking:backfill` com `cursor: null`, avance o cursor retornado até `isDone: true` e só então publique a interface. A migração é paginada e pode ser repetida sem duplicar participantes.
 
 A página se atualiza na meia-noite anunciada pelo servidor, ao voltar à aba e ao recuperar a conexão. Há uma reconciliação a cada 30 segundos para fotos cadastradas com a página aberta. O tema Interativo verifica as mudanças a cada virada de minuto e ao retornar à aba, sem alterar temas manuais. As transições respeitam `prefers-reduced-motion`.
 
