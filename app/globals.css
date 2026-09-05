@@ -1554,7 +1554,7 @@ a:focus-visible {
   --control: #04101b;
   --clock-face: #0b2130;
   --button-ink: #17212a;
-  --theme-duration: 5s;
+  --theme-duration: 650ms;
   color-scheme: dark;
 }
 :root[data-period="dawn"] {
@@ -1588,7 +1588,7 @@ body, .site-shell, .game-card, .play-card, .answer-panel, .analog-clock, .brand,
 .site-shell { height: auto; min-height: 100svh; overflow: clip; background: var(--background); }
 .site-shell::after { opacity: .18; }
 .landscapes { position: absolute; inset: 0; z-index: -3; pointer-events: none; }
-.nightscape { inset: 0; z-index: 0; opacity: 0; filter: none; animation: none; transition: opacity 2s ease; background-position: 30% center; }
+.nightscape { inset: 0; z-index: 0; opacity: 0; filter: none; animation: none; transition: opacity 800ms ease; background-position: 30% center; }
 .landscape-morning { background-image: url('/landscape-morning.webp'); }
 .landscape-afternoon { background-image: url('/landscape-afternoon.webp'); }
 .landscape-night { background-image: url('/landscape-night.webp'); opacity: 1; }
@@ -1608,7 +1608,7 @@ body, .site-shell, .game-card, .play-card, .answer-panel, .analog-clock, .brand,
 .header-right { justify-self: end; gap: 1.1rem; }
 .language-switch { gap: .3rem; }
 .language-switch button, .help-button { border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; min-width: 2.5rem; min-height: 2.5rem; font-size: .875rem; }
-.language-switch button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .45rem .65rem; border: 1.5px solid transparent; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+.language-switch button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .45rem .65rem; border: 1.5px solid transparent; border-radius: 999px; font-weight: 600; white-space: nowrap; transition-duration: 120ms; }
 .language-indicator { width: .65rem; height: .65rem; border: 1.5px solid currentColor; border-radius: 50%; opacity: .45; }
 .language-switch button[aria-pressed="true"] { color: var(--foreground); border-color: var(--accent-bright); background: color-mix(in srgb, var(--foreground) 9%, var(--surface-solid)); }
 .language-switch button[aria-pressed="true"] .language-indicator { opacity: 1; background: var(--accent-bright); box-shadow: inset 0 0 0 2px var(--surface-solid); }
@@ -1630,7 +1630,8 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .start-button, .confirm-button { background: var(--accent); color: var(--button-ink); border-color: var(--line); font-size: .875rem; letter-spacing: .04em; }
 .start-button svg, .confirm-button svg { background: var(--button-ink); stroke: var(--accent); }
 .start-button:disabled { opacity: .6; cursor: wait; }
-.play-card { min-height: 0; grid-template-columns: minmax(0, 1.35fr) minmax(24rem, .9fr); }
+.hero-playing { padding-inline: clamp(.75rem, 1.5vw, 2rem); }
+.play-card { width: 100%; max-width: 100rem; min-height: 0; grid-template-columns: minmax(0, 1.5fr) minmax(24rem, 1fr); }
 .round-photo { min-height: 36rem; }
 .photo-meta { pointer-events: none; }
 .photo-meta h1 { color: #fff7ed; }
