@@ -992,6 +992,28 @@ a:focus-visible {
   font-size: 0.7rem;
 }
 
+.round-result-copy .chosen-time-result {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+  color: var(--foreground);
+}
+
+.chosen-time-result > span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.chosen-time-result > strong {
+  color: var(--accent-bright);
+  font-family: var(--font-clock);
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+}
+
 .round-points {
   display: flex;
   min-width: 4.6rem;

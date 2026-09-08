@@ -78,7 +78,7 @@ function GameRound({ game }: { game: ReturnType<typeof useDailyGame> }) {
       {challenge.photo.credit && <p className="photo-credit">{text.credit}: {challenge.photo.creditUrl ? <a href={challenge.photo.creditUrl} target="_blank" rel="noreferrer">{challenge.photo.credit}</a> : challenge.photo.credit}</p>}
     </div>
     <div className="answer-panel" aria-busy={submitting || revealing}>
-      <div className="answer-heading"><div><p className="eyebrow compact-eyebrow"><span aria-hidden="true" />{shownResult ? text.result : text.perception}</p><h2>{shownResult ? text.correct : text.adjust}</h2></div><strong className="selected-time" aria-live="polite">{formatTime(selectedTime)}</strong></div>
+      <div className="answer-heading"><div>{!shownResult && <p className="eyebrow compact-eyebrow"><span aria-hidden="true" />{text.perception}</p>}<h2>{shownResult ? text.correct : text.adjust}</h2></div><strong className="selected-time" aria-live="polite">{formatTime(selectedTime)}</strong></div>
       <AnalogClock time={selectedTime} handAngles={pending && !result ? getHandAngles(pending.chosenMinutes) : handAngles} isAnimating={revealing} isLocked={locked} scoreVisualization={shownResult ? { correctTime: result.correctMinutes, chosenTime: result.chosenMinutes, score: result.score } : null} onTimeChange={chooseTime} onTick={playTick} />
       {!shownResult && <div className="precision-controls" role="group" aria-label={text.precision}>
         <Stepper label={text.hour} value={String(hour).padStart(2, "0")} onDecrease={() => changeBy(-60)} onIncrease={() => changeBy(60)} disabled={locked} />
@@ -87,7 +87,7 @@ function GameRound({ game }: { game: ReturnType<typeof useDailyGame> }) {
       </div>}
       <div className="daily-feedback" aria-live="polite">
         {submitting || revealing ? <p className="daily-status" role="status">{text.revealing}</p> : null}
-        {shownResult && <div className="round-result" style={{ "--score-color": scoreColor(result.score) } as CSSProperties}><div className="round-result-copy"><span>{text.correct}</span><strong>{formatTime(result.correctMinutes)}</strong><p>{text.chosen} {formatTime(result.chosenMinutes)}</p><p>{result.difference === 0 ? text.exact : `${Math.floor(result.difference / 60) ? `${Math.floor(result.difference / 60)}h ` : ""}${result.difference % 60}min ${text.difference}`}</p></div><div className="round-points"><strong>{result.score}</strong><span>{text.points}</span></div></div>}
+        {shownResult && <div className="round-result" style={{ "--score-color": scoreColor(result.score) } as CSSProperties}><div className="round-result-copy"><span>{text.correct}</span><strong>{formatTime(result.correctMinutes)}</strong><p className="chosen-time-result"><span>{text.chosen}</span><strong>{formatTime(result.chosenMinutes)}</strong></p><p>{result.difference === 0 ? text.exact : `${Math.floor(result.difference / 60) ? `${Math.floor(result.difference / 60)}h ` : ""}${result.difference % 60}min ${text.difference}`}</p></div><div className="round-points"><strong>{result.score}</strong><span>{text.points}</span></div></div>}
         {(error || imageFailed) && <p role="alert" className="game-error">{text[error ?? "connection"]}</p>}
       </div>
       {shownResult && <section className="daily-ranking" aria-label={text.rankingTitle}>
