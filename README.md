@@ -1,98 +1,93 @@
+<div align="center">
+
 # Horar.io
 
-Jogo diário de descobrir o horário de uma fotografia real. Next.js mantém a interface estática; Convex é o backend autoritativo. Sem conta de jogador ou pistas, com colocação diária após o palpite.
+**Observe. Sinta. Confie na sua intuição.**
 
-## Executar localmente
+</div>
 
-```sh
-npm install
-npm run backend
-```
+## Intuição e sorte
 
-Na primeira execução, escolha desenvolvimento local sem conta (agentes também podem usar `CONVEX_AGENT_MODE=anonymous`). O Convex grava `.env.local` e mantém o banco em `.convex/`, ambos ignorados pelo Git. Mantenha esse processo aberto. Em outro terminal:
+Horar.io é um jogo diário de adivinhação. Observe atentamente a fotografia, interprete os detalhes da cena e tente descobrir em que horário ela foi registrada.
 
-```sh
-npm run photos:import
-npm run dev
-```
+Uma nova imagem é disponibilizada todos os dias, renovando o desafio e oferecendo uma nova oportunidade de testar sua percepção.
 
-Abra http://localhost:3000. O importador começa na data atual de Brasília e agenda as oito fotografias originais, uma por dia. Datas existentes são preservadas; executar novamente não as sobrescreve. O primeiro acervo foi importado localmente e em produção para 05–12/09/2026. Não existe repetição automática nem horário inventado se o calendário ficar vazio: a interface informa a indisponibilidade.
+<div align="center">
+  <img src="docs/readme-assets/palpite-exato.gif" alt="Jogador ajustando o relógio e acertando exatamente o horário da fotografia" width="620">
+</div>
 
-## Acervo e administração
+## Sobre o projeto
 
-- `convex/schema.ts`: fotografia, horário em minutos (0–1439), data `YYYY-MM-DD`, imagem e créditos/descrições opcionais.
-- `convex/admin.ts`: funções internas de upload e agendamento, acessíveis apenas ao administrador via CLI/dashboard Convex. A interface pública não oferece escrita no acervo.
-- `photo-library/`: originais e catálogo administrativo, fora de `public/` e de qualquer importação da interface. Os horários foram preservados do jogo anterior; precisam ser conferidos com o autor para confirmar a hora de captura das fotos.
-- `scripts/import-photos.mjs`: aplica orientação, limita a largura a 2400px e reencoda em JPEG sem EXIF/XMP/IPTC/GPS antes de enviar ao Convex File Storage.
-- `convex/images.ts`: único ponto que resolve o provedor de imagem. O modelo também aceita URL HTTPS para uma migração futura; nesse caso, a imagem deve ter sido higienizada previamente.
+Horar.io nasceu de uma ideia original e foi desenvolvido para proporcionar um momento simples e divertido ao longo do dia.
 
-Para incluir fotografias, crie um JSON administrativo fora de `public/`:
+Observe, confie na sua intuição e tente alcançar a melhor colocação no ranking diário!
 
-```json
-[
-  {
-    "file": "minha-fotografia.jpg",
-    "correctTime": "14:32",
-    "challengeDate": "2026-09-13",
-    "credit": "Nome do fotógrafo",
-    "creditUrl": "https://example.com/autor",
-    "alt": { "pt": "Descrição neutra da cena", "en": "Neutral description of the scene" }
-  }
-]
-```
+<div align="center">
+  <img src="docs/readme-assets/sobre-o-projeto.png" alt="Visão geral do desafio diário do Horar.io" width="900">
+</div>
 
-O caminho da foto é relativo ao JSON. `alt`, créditos, posição e data são opcionais; sem data, o importador usa dias consecutivos a partir da data inicial. Evite pistas de horário em textos, créditos, nomes e URLs.
+## Características de jogabilidade
 
-```sh
-npm run photos:import -- caminho/catalogo.json 2026-09-13
-```
+O jogador pode definir seu palpite utilizando um relógio analógico interativo, ajustando diretamente os ponteiros de horas e minutos.
 
-Uma data aceita apenas uma fotografia. O importador não altera um desafio publicado. Para manutenção do calendário futuro, use o dashboard do Convex com acesso de administrador; preserve datas únicas e não altere desafios já iniciados.
+<div align="center">
+  <img src="docs/readme-assets/ajuste-ponteiros.gif" alt="Ajuste dos ponteiros do relógio analógico" width="620">
+</div>
 
-## Regras e segurança
+Para quem prefere maior precisão, também é possível informar o horário por meio dos controles numéricos.
 
-`challenges.current` usa o relógio do servidor e devolve apenas imagem, data, créditos e próxima liberação. É uma mutation de leitura para evitar cache temporal de queries. A seleção é feita por data de Brasília, sem depender de um cron. Meia-noite corresponde a 03:00 UTC; Brasília não usa horário de verão desde 2019.
+<div align="center">
+  <img src="docs/readme-assets/controles-numericos.png" alt="Controles numéricos de hora, minuto e período" width="440">
+</div>
 
-`challenges.submit` valida data, fotografia e palpite inteiro no backend. A pontuação original é mantida: distância circular de 24h; 100 pontos no acerto; queda linear arredondada até zero a 120 minutos. Só após o envio é devolvido o horário real, com diferença e pontuação.
+A seção **Como jogar**, acessível pelo botão **?** no canto superior direito da tela, apresenta um tutorial interativo sobre o funcionamento do relógio e explica as principais regras do jogo.
 
-O navegador grava um identificador aleatório e `horario.daily.YYYY-MM-DD` com palpite pendente, resultado e sequência. O Convex guarda recibos anônimos por identificador/data para que chamadas repetidas ou abas concorrentes devolvam o primeiro resultado. Um palpite pendente fica bloqueado e pode ser reenviado com o mesmo valor caso a resposta se perca. Não há listagem pública de recibos. Limpar os dados do navegador permite jogar novamente, como previsto no produto.
+<div align="center">
+  <img src="docs/readme-assets/como-jogar.gif" alt="Abertura do tutorial Como jogar" width="900">
+</div>
 
-A sequência mede dias consecutivos com um palpite, independentemente dos pontos. Recarregar não incrementa a sequência; deixar de jogar um dia a interrompe. Idioma, tema e visita às regras também são persistidos localmente. O navegador precisa permitir localStorage para enviar palpites.
+## Visual
 
-O ranking usa a pontuação calculada no servidor: posição = 1 + número de participantes com pontuação maior. Empates compartilham a posição (1, 1, 3). O total conta recibos anônimos únicos por dia, não pessoas verificadas; limpar os dados do navegador cria outro participante. Só o próprio resultado expõe a colocação e o total, nunca os recibos de terceiros. A colocação é atualizada a cada reconciliação de 30 segundos e ao retornar à aba, até o encerramento do desafio.
+O site conta com quatro temas visuais inspirados nos diferentes períodos do dia: **Manhã**, **Tarde**, **Noite** e **Madrugada**. No modo **Interativo**, a aparência é alterada automaticamente de acordo com o horário real; também é possível manter qualquer um dos temas de forma permanente.
 
-`convex/ranking.ts` usa o componente Aggregate com uma partição por data de Brasília. A troca de fotografia começa um ranking independente, preservando o histórico sem cron destrutivo. A inserção do recibo e do ranking é atômica; reenvios não aumentam o total. Após instalar em um banco com recibos existentes, execute a função interna `ranking:backfill` com `cursor: null`, avance o cursor retornado até `isDone: true` e só então publique a interface. A migração é paginada e pode ser repetida sem duplicar participantes.
+<div align="center">
+  <img src="docs/readme-assets/temas.gif" alt="Alternância entre os quatro temas visuais do Horar.io" width="900">
+</div>
 
-A página se atualiza na meia-noite anunciada pelo servidor, ao voltar à aba e ao recuperar a conexão. Há uma reconciliação a cada 30 segundos para fotos cadastradas com a página aberta. O tema Interativo verifica as mudanças a cada virada de minuto e ao retornar à aba, sem alterar temas manuais. As transições respeitam `prefers-reduced-motion`.
+A interface está disponível em **Português do Brasil (PT-BR)** e **Inglês (EN)**.
 
-## Produção global
+## Demais mecânicas
 
-O projeto **horar-io** está conectado à equipe **gustavo-barbosa-152fb**.
+Após o envio do palpite, o horário exato da fotografia é revelado e a pontuação é calculada com base na diferença entre os dois horários. Um acerto exato vale **100 pontos**. A pontuação diminui gradualmente conforme a distância aumenta e chega a zero quando o palpite está a duas horas ou mais do horário correto. O cálculo sempre considera o menor intervalo dentro de um ciclo de 24 horas, inclusive quando a diferença atravessa a meia-noite.
 
-- Produção: `https://polite-sardine-705.convex.cloud`
-- Desenvolvimento em nuvem: `https://outstanding-skunk-805.convex.cloud`
-- Site: https://horar-io.stable-squid-4933.chatgpt.site
-- Calendário inicial de produção: 05–12/09/2026, com as oito fotografias originais higienizadas.
+<div align="center">
+  <img src="docs/readme-assets/resultado-pontuacao.png" alt="Relógio de resultado com arco de precisão e pontuação" width="460">
+</div>
 
-A prévia e o build foram configurados com a URL de produção. A configuração local anterior foi preservada em `.env.convex-local` (ignorada pelo Git). Os recibos de teste do banco local não foram migrados.
+O resultado também apresenta a colocação do jogador no ranking diário. Empates compartilham a mesma posição, e o ranking é atualizado ao longo do dia.
 
-Para publicar atualizações ou configurar outra máquina:
+A interface informa quanto tempo falta para a próxima fotografia, liberada à meia-noite no horário de Brasília, e mantém uma sequência com o número de dias consecutivos em que o jogador participou do desafio.
 
-1. Execute `npx convex login` e associe este projeto à sua conta.
-2. Execute `npx convex deploy` para publicar schema e funções.
-3. Importe o calendário no destino de produção com `npm run photos:import -- caminho/catalogo.json 2026-09-13 --prod`.
-4. Configure `NEXT_PUBLIC_CONVEX_URL` com a URL de **produção**, execute `npm run build` e publique o diretório `out/` no Sites existente.
+## Programação
 
-O deployment local e o de produção têm dados separados. Nunca publique um build que aponte para `127.0.0.1:3210`. Não exponha chaves de administração em variáveis `NEXT_PUBLIC_*`, no repositório ou no frontend. O único endereço público necessário ao jogo é a URL do Convex. O conteúdo de `photo-library/`, scripts, `.env.local` e `.convex/` não deve ser servido publicamente. Caso o repositório seja público, mantenha o catálogo futuro em armazenamento privado.
+<div align="center">
 
-## Verificação
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111111)
+![Convex](https://img.shields.io/badge/Convex-Backend-EE342F?logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 
-```sh
-npm test
-npm run lint
-npm run build
-```
+</div>
 
-Os testes cobrem a fórmula original, distância pela meia-noite, limites de horário, fuso/data, temas, sequência, projeção sem resposta, recibos, isolamento entre jogadores, rejeição de desafios fora do dia, calendário único e ausência de fotos. As funções são exercitadas com `convex-test`; a prévia também deve ser verificada contra o Convex local e em desktop/celular.
+O Horar.io foi desenvolvido principalmente em **TypeScript**, utilizando **Next.js** e **React** na construção da interface. A apresentação visual combina **CSS** e **Tailwind CSS**, enquanto o **Convex** oferece a infraestrutura de backend, armazenamento e atualização dos dados em tempo real.
 
-Referências: [Convex local](https://docs.convex.dev/cli/local-deployments), [armazenamento de imagens](https://docs.convex.dev/file-storage/upload-files), [funções internas](https://docs.convex.dev/functions/internal-functions).
+O projeto também utiliza **JavaScript** em ferramentas auxiliares, como o processo de preparação e importação das fotografias.
+
+---
+
+<div align="center">
+
+Desenvolvido por **Lavaley**
+
+</div>
