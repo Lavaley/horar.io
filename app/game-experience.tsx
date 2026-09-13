@@ -47,6 +47,7 @@ function GameRound({ game }: { game: ReturnType<typeof useDailyGame> }) {
   const playTick = useMechanicalTick();
   const [imageFailed, setImageFailed] = useState(false);
   const [imageReady, setImageReady] = useState(false);
+  const confirmationDialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (!result) return;
     const animate = !previousResult.current && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -68,6 +69,14 @@ function GameRound({ game }: { game: ReturnType<typeof useDailyGame> }) {
   }
   function changeBy(delta: number) { playTick(); chooseTime(selectedTime + delta); }
   function selectPeriod(pm: boolean) { if ((hour >= 12) !== pm) { playTick(); chooseTime(selectedTime + (pm ? 720 : -720), true); } }
+  function requestSubmission() {
+    if (pending) void game.submit(selectedTime);
+    else confirmationDialog.current?.showModal();
+  }
+  function confirmSubmission() {
+    confirmationDialog.current?.close();
+    void game.submit(selectedTime);
+  }
   const dateLabel = new Intl.DateTimeFormat(language === "pt" ? "pt-BR" : "en", { dateStyle: "medium", timeZone: "America/Sao_Paulo" }).format(new Date(`${challenge.date}T12:00:00Z`));
   const shownResult = result && !revealing;
   return <section className={`play-card${shownResult ? " daily-completed" : ""}`} aria-labelledby="round-title">
@@ -95,8 +104,19 @@ function GameRound({ game }: { game: ReturnType<typeof useDailyGame> }) {
         <p aria-live="polite">{result.ranking ? <>{text.rankingPosition} <strong>{result.ranking.position.toLocaleString(language === "pt" ? "pt-BR" : "en")}</strong> {text.rankingOf} <strong>{result.ranking.total.toLocaleString(language === "pt" ? "pt-BR" : "en")}</strong> {result.ranking.total === 1 ? text.rankingPlayer : text.rankingPlayers}</> : text.rankingLoading}</p>
         <small>{text.rankingNote}</small>
       </section>}
-      {shownResult ? <ReturnTomorrow challenge={challenge} now={now} streak={game.streak} /> : <><button className="confirm-button" type="button" onClick={() => void game.submit(selectedTime)} disabled={submitting || revealing || !!result || !imageReady || imageFailed || error === "storageError" || now >= challenge.nextReleaseAt}><span>{submitting || revealing ? text.wait : pending ? text.recover : text.confirm}</span><Arrow /></button><p className="one-guess-note">{text.oneGuess}</p></>}
+      {shownResult ? <ReturnTomorrow challenge={challenge} now={now} streak={game.streak} /> : <><button className="confirm-button" type="button" onClick={requestSubmission} disabled={submitting || revealing || !!result || !imageReady || imageFailed || error === "storageError" || now >= challenge.nextReleaseAt}><span>{submitting || revealing ? text.wait : pending ? text.recover : text.confirm}</span><Arrow /></button><p className="one-guess-note">{text.oneGuess}</p></>}
     </div>
+    <dialog ref={confirmationDialog} className="guess-dialog" aria-labelledby="guess-dialog-title" aria-describedby="guess-dialog-description">
+      <button className="modal-close" type="button" aria-label={text.adjustGuessAction} onClick={() => confirmationDialog.current?.close()}>×</button>
+      <p className="eyebrow"><span aria-hidden="true" />{text.oneGuess}</p>
+      <h2 id="guess-dialog-title">{text.confirmGuessTitle}</h2>
+      <p id="guess-dialog-description" className="guess-dialog-question">{text.confirmGuessPrompt} <strong>{formatTime(selectedTime)}</strong>?</p>
+      <p className="guess-dialog-warning">{text.confirmGuessWarning}</p>
+      <div className="guess-dialog-actions">
+        <button className="guess-adjust-button" type="button" onClick={() => confirmationDialog.current?.close()}>{text.adjustGuessAction}</button>
+        <button className="confirm-button" type="button" onClick={confirmSubmission}><span>{text.confirmGuessAction}</span><Arrow /></button>
+      </div>
+    </dialog>
   </section>;
 }
 

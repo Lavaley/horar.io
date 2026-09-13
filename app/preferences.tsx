@@ -80,7 +80,7 @@ export default function SiteExperience({ children }: { children: React.ReactNode
         <div className="header-right"><span className="game-label"><span aria-hidden="true" />{text.dailyGame}</span><button ref={help} className="help-button" type="button" aria-label={text.rulesTitle} aria-haspopup="dialog" onClick={() => setRulesOpen(true)}>?</button></div>
       </header>
       {children}
-      <footer className="site-footer"><span>© 2026 Horar.io</span><span className="footer-motto">{text.motto}</span></footer>
+      <footer className="site-footer"><span>© Lavaley 2026</span><span className="footer-motto">{text.motto}</span></footer>
       <dialog ref={dialog} className="rules-dialog" aria-labelledby="rules-title" onCancel={event => { event.preventDefault(); closeRules(); }} onClose={() => setRulesOpen(false)} onClick={event => { if (event.target === event.currentTarget) { const r = event.currentTarget.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) closeRules(); } }}>
         <button className="modal-close" type="button" aria-label={text.close} onClick={closeRules} autoFocus>×</button>
         <h2 id="rules-title">{text.rulesTitle}</h2>

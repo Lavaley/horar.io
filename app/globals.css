@@ -1699,6 +1699,22 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .rules-dialog p:nth-of-type(2) { color: var(--foreground); font-weight: 600; }
 .modal-close { position: absolute; top: .75rem; right: .75rem; width: 2.75rem; height: 2.75rem; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.7rem; cursor: pointer; }
 .modal-close:hover { background: var(--control); }
+.guess-dialog { position: fixed; inset: 0; margin: auto; width: min(31rem, calc(100vw - 2rem)); padding: clamp(1.5rem, 5vw, 2.4rem); border: 1px solid var(--line); border-radius: 1.4rem; background: var(--surface-solid); color: var(--foreground); box-shadow: 0 2rem 7rem #0008, inset 0 1px 0 #ffffff0d; }
+.guess-dialog::backdrop { background: color-mix(in srgb, var(--background) 76%, transparent); backdrop-filter: blur(8px) saturate(.8); }
+.guess-dialog .eyebrow { margin-bottom: 1rem; }
+.guess-dialog h2 { margin: 0 2.25rem .8rem 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2rem, 7vw, 2.7rem); font-weight: 400; letter-spacing: -.045em; line-height: 1.05; }
+.guess-dialog-question { margin: 0; color: var(--muted); font-size: 1.05rem; line-height: 1.6; }
+.guess-dialog-question strong { color: var(--accent-bright); font-family: var(--font-clock); font-size: 1.3em; font-weight: 600; white-space: nowrap; }
+.guess-dialog-warning { margin: .9rem 0 0; padding-top: .9rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; line-height: 1.5; }
+.guess-dialog-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .75rem; margin-top: 1.5rem; }
+.guess-adjust-button { min-height: 3.15rem; padding: .7rem 1rem; border: 1px solid var(--line); border-radius: 999px; background: var(--control); color: var(--foreground); cursor: pointer; font-size: .8rem; font-weight: 650; }
+.guess-adjust-button:hover { border-color: var(--accent); color: var(--accent-bright); }
+.guess-dialog .confirm-button { min-width: 0; }
+@media (max-width: 32rem) {
+  .guess-dialog-actions { grid-template-columns: 1fr; }
+  .guess-dialog .confirm-button, .guess-adjust-button { width: 100%; }
+  .guess-adjust-button { grid-row: 2; }
+}
 @media (max-width: 68rem) { .game-label { display: none; } }
 @media (max-width: 50rem) {
   .play-card { grid-template-columns: 1fr; }
