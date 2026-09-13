@@ -10,7 +10,7 @@
 
 Horar.io é um jogo diário de adivinhação. Observe atentamente a fotografia, interprete os detalhes da cena e tente descobrir em que horário ela foi registrada.
 
-Uma nova imagem é disponibilizada todos os dias, renovando o desafio e oferecendo uma nova oportunidade de testar sua percepção.
+Uma fotografia é disponibilizada por dia. O catálogo de 50 fotos reais se repete automaticamente ao terminar, mantendo o desafio diário sem necessidade de reposição manual. As fontes, licenças e horários registrados pelas câmeras estão no [catálogo de fotografias](photo-library/sky/CATALOGO.md).
 
 <div align="center">
   <img src="docs/readme-assets/palpite-exato.gif" alt="Jogador ajustando o relógio e acertando exatamente o horário da fotografia" width="620">

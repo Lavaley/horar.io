@@ -3,6 +3,7 @@ import { mutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { brasiliaDay, nextRelease } from "../lib/daily";
 import { imageUrl } from "./images";
+import { photographForDate } from "./rotation";
 import { scoreGuess } from "./scoring";
 import { dailyRanking, placement, rankingValidator } from "./ranking";
 import type { MutationCtx } from "./_generated/server";
@@ -46,7 +47,7 @@ export const current = mutation({
   handler: async (ctx) => {
     const now = Date.now();
     const date = brasiliaDay(now);
-    const photo = await ctx.db.query("photographs").withIndex("by_date", q => q.eq("challengeDate", date)).unique();
+    const photo = await photographForDate(ctx, date);
     const image = photo ? await imageUrl(ctx, photo.image) : null;
     return {
       date, serverNow: now, nextReleaseAt: nextRelease(now),
@@ -82,8 +83,8 @@ export const submit = mutation({
     const existing = await ctx.db.query("guesses").withIndex("by_player_date", q => q.eq("playerToken", args.playerToken).eq("date", args.date)).unique();
     if (existing) return receipt(ctx, existing);
     if (args.date !== brasiliaDay(Date.now())) throw new ConvexError("DAY_CHANGED");
-    const photo = await ctx.db.get(args.photographId);
-    if (!photo || photo.challengeDate !== args.date) throw new ConvexError("CHALLENGE_CHANGED");
+    const photo = await photographForDate(ctx, args.date);
+    if (!photo || photo._id !== args.photographId) throw new ConvexError("CHALLENGE_CHANGED");
     const result = {
       date: args.date, photographId: photo._id, chosenMinutes: args.chosenMinutes,
       correctMinutes: photo.correctMinutes, ...scoreGuess(args.chosenMinutes, photo.correctMinutes),

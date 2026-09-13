@@ -7,6 +7,11 @@ export const imageAsset = v.union(
 );
 
 export default defineSchema({
+  photoRotations: defineTable({
+    key: v.string(),
+    startDate: v.string(),
+    photographIds: v.array(v.id("photographs")),
+  }).index("by_key", ["key"]),
   photographs: defineTable({
     image: imageAsset,
     correctMinutes: v.number(),

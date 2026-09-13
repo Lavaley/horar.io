@@ -91,6 +91,42 @@ describe("Convex daily game", () => {
   });
 });
 
+describe("perpetual photo rotation", () => {
+  it("cycles 50 photos indefinitely, changes at Brasília midnight and keeps daily receipts separate", async () => {
+    const { t } = await setup();
+    const ids = await t.run(async ctx => {
+      const ids = [];
+      for (let index = 0; index < 50; index++) {
+        ids.push(await ctx.db.insert("photographs", { image: { provider: "external", url: `https://example.com/${index}.jpg` }, challengeDate: `catalog-${index}`, correctMinutes: 600 + index }));
+      }
+      await ctx.db.insert("photoRotations", { key: "active", startDate: "2026-09-05", photographIds: ids });
+      return ids;
+    });
+    const first = await t.mutation(api.challenges.submit, { playerToken, date: "2026-09-05", photographId: ids[0], chosenMinutes: 600 });
+    for (const day of [1, 49, 50, 99, 100, 365, 3650]) {
+      vi.setSystemTime(new Date(Date.parse("2026-09-05T03:00:00Z") + day * 86400000));
+      const current = await t.mutation(api.challenges.current, {});
+      expect(current.photo?.id).toBe(ids[day % 50]);
+      expect(JSON.stringify(current)).not.toContain("correctMinutes");
+      await expect(t.mutation(api.challenges.submit, { playerToken, date: current.date, photographId: ids[(day + 1) % 50], chosenMinutes: 600 })).rejects.toThrow("CHALLENGE_CHANGED");
+      const result = await t.mutation(api.challenges.submit, { playerToken, date: current.date, photographId: ids[day % 50], chosenMinutes: 600 + day % 50 });
+      expect(result.score).toBe(100);
+      expect(result.ranking).toEqual({ position: 1, total: 1 });
+    }
+    expect(await t.mutation(api.challenges.result, { playerToken, date: first.date })).toEqual(first);
+    vi.setSystemTime(new Date("2026-10-25T02:59:59Z"));
+    expect((await t.mutation(api.challenges.current, {})).photo?.id).toBe(ids[49]);
+    vi.setSystemTime(new Date("2026-10-25T03:00:00Z"));
+    expect((await t.mutation(api.challenges.current, {})).photo?.id).toBe(ids[0]);
+  });
+
+  it("rejects incomplete rotation activation", async () => {
+    const { t, id } = await setup();
+    await expect(t.mutation(internal.admin.activateRotation, { startDate: "2026-09-05", photographIds: Array(50).fill(id) })).rejects.toThrow("REQUIRES_50_UNIQUE_PHOTOS");
+    await expect(t.mutation(internal.admin.activateRotation, { startDate: "2026-02-30", photographIds: [] })).rejects.toThrow("INVALID_DATE");
+  });
+});
+
 describe("daily ranking", () => {
   const tokenFor = (index: number) => `${String(index).padStart(8, "0")}-aaaa-4aaa-aaaa-aaaaaaaaaaaa`;
 

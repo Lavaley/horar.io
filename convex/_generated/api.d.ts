@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as challenges from "../challenges.js";
 import type * as images from "../images.js";
 import type * as ranking from "../ranking.js";
+import type * as rotation from "../rotation.js";
 import type * as scoring from "../scoring.js";
 
 import type {
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   challenges: typeof challenges;
   images: typeof images;
   ranking: typeof ranking;
+  rotation: typeof rotation;
   scoring: typeof scoring;
 }>;
 
