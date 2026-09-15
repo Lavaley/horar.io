@@ -1599,7 +1599,7 @@ a:focus-visible {
   --control: #edd3ab; --clock-face: #fff0d6; --button-ink: #fff7e7;
   color-scheme: light;
 }
-body { overflow: auto; }
+body { overflow: hidden; }
 body, .site-shell, .game-card, .play-card, .answer-panel, .analog-clock, .brand,
 .site-header, .site-footer, .rules-dialog, .theme-control select, .language-switch button,
 .help-button, .time-stepper > div, .period-control > div, .start-button, .confirm-button,
@@ -1607,7 +1607,7 @@ body, .site-shell, .game-card, .play-card, .answer-panel, .analog-clock, .brand,
 .time-stepper strong, .clock-numbers > span, .round-result, .card-footer, .rule-icon {
   transition: background-color var(--theme-duration) ease, color var(--theme-duration) ease, border-color var(--theme-duration) ease, box-shadow var(--theme-duration) ease;
 }
-.site-shell { height: auto; min-height: 100svh; overflow: clip; background: var(--background); }
+.site-shell { height: 100svh; min-height: 0; overflow: hidden; background: var(--background); }
 .site-shell::after { opacity: .18; }
 .landscapes { position: absolute; inset: 0; z-index: -3; pointer-events: none; }
 .nightscape { inset: 0; z-index: 0; opacity: 0; filter: none; animation: none; transition: opacity 800ms ease; background-position: 30% center; }
@@ -1622,7 +1622,7 @@ body, .site-shell, .game-card, .play-card, .answer-panel, .analog-clock, .brand,
 :root[data-period="dawn"] .landscape-dawn { opacity: 1; }
 :root[data-period="morning"] .star-glow,
 :root[data-period="afternoon"] .star-glow { display: none; }
-.hero { min-height: calc(100svh - 10rem); padding-block: 2rem; overflow: visible; }
+.hero { min-height: 0; padding-block: clamp(.75rem, 2vh, 2rem); overflow: hidden; }
 .site-header { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; background: transparent; border-color: var(--line); min-height: 5rem; }
 .brand { color: var(--foreground); justify-self: center; }
 .preferences-controls, .header-right, .language-switch { display: flex; align-items: center; }
@@ -1649,7 +1649,15 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .rule p { font-size: .875rem; }
 .eyebrow, .score-note > span, .compact-eyebrow { font-size: .75rem; }
 .score-note strong { font-size: .95rem; }
-.start-button, .confirm-button { background: var(--accent); color: var(--button-ink); border-color: var(--line); font-size: .875rem; letter-spacing: .04em; }
+.start-button, .confirm-button {
+  background: var(--accent);
+  color: var(--button-ink);
+  border-color: transparent;
+  box-shadow: none;
+  font-size: .875rem;
+  letter-spacing: .04em;
+}
+.start-button:hover, .confirm-button:hover:not(:disabled) { box-shadow: none; }
 .start-button svg, .confirm-button svg { background: var(--button-ink); stroke: var(--accent); }
 .start-button:disabled { opacity: .6; cursor: wait; }
 .hero-playing { padding-inline: clamp(.75rem, 1.5vw, 2rem); }
@@ -1692,11 +1700,12 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .availability-card h1 { font-family: Georgia, serif; font-size: 2.5rem; font-weight: 400; line-height: 1.1; }
 .availability-card > p { margin-block: 1rem; color: var(--muted); line-height: 1.6; }
 .availability-card button { margin-top: 1.5rem; }
-.rules-dialog { position: fixed; inset: 0; margin: auto; width: min(34rem, calc(100vw - 2rem)); max-height: calc(100svh - 2rem); overflow: auto; padding: 2.25rem; border: 1px solid var(--line); border-radius: 1.4rem; background: var(--surface-solid); color: var(--foreground); box-shadow: 0 2rem 7rem #0006; }
+.rules-dialog { position: fixed; inset: 0; margin: auto; width: min(62rem, calc(100vw - 2rem)); max-height: calc(100svh - 2rem); overflow: hidden; padding: clamp(1.25rem, 3vh, 2.25rem); border: 1px solid var(--line); border-radius: 1.4rem; background: var(--surface-solid); color: var(--foreground); box-shadow: 0 2rem 7rem #0006; }
+.rules-dialog[open] { display: grid; grid-template-columns: minmax(18rem, .9fr) minmax(18rem, 1.1fr); gap: clamp(1rem, 2vw, 1.75rem); align-items: start; }
 .rules-dialog::backdrop { background: #020612a6; backdrop-filter: blur(7px); }
-.rules-dialog h2 { margin: 0 2rem 1.5rem 0; font-family: Georgia, serif; font-size: 2.25rem; font-weight: 400; letter-spacing: -.04em; }
-.rules-dialog p { margin: 1rem 0 0; color: var(--muted); font-size: 1rem; line-height: 1.65; }
-.rules-dialog p:nth-of-type(2) { color: var(--foreground); font-weight: 600; }
+.rules-dialog h2 { grid-column: 1 / -1; margin: 0 2rem 0 0; font-family: Georgia, serif; font-size: 2.25rem; font-weight: 400; letter-spacing: -.04em; }
+.rules-dialog p { margin: .75rem 0 0; color: var(--muted); font-size: clamp(.78rem, 1.5vh, .95rem); line-height: 1.45; }
+.rules-copy p:first-child { margin-top: 0; color: var(--foreground); font-weight: 600; }
 .modal-close { position: absolute; top: .75rem; right: .75rem; width: 2.75rem; height: 2.75rem; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.7rem; cursor: pointer; }
 .modal-close:hover { background: var(--control); }
 .guess-dialog { position: fixed; inset: 0; margin: auto; width: min(31rem, calc(100vw - 2rem)); padding: clamp(1.5rem, 5vw, 2.4rem); border: 1px solid var(--line); border-radius: 1.4rem; background: var(--surface-solid); color: var(--foreground); box-shadow: 0 2rem 7rem #0008, inset 0 1px 0 #ffffff0d; }
@@ -1719,9 +1728,19 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 @media (max-width: 50rem) {
   .play-card { grid-template-columns: 1fr; }
   .round-photo { min-height: clamp(17rem, 65vw, 27rem); }
-  .hero-playing { overflow: visible; }
+  .hero-playing { overflow: hidden; }
   .site-header { padding-inline: 1rem; }
   .preferences-controls { gap: .35rem; }
+
+  .hero-playing .play-card {
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: minmax(8rem, 32%) minmax(0, 1fr);
+  }
+
+  .hero-playing .round-photo { min-height: 0; }
+  .hero-playing .answer-panel { min-height: 0; padding: 1rem; gap: .7rem; }
+  .hero-playing .analog-clock { width: min(14rem, 28svh); }
 }
 @media (max-width: 36rem) {
   .site-header { grid-template-columns: 1fr auto; gap: .25rem; padding-block: .65rem; }
@@ -1729,12 +1748,25 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
   .header-right { grid-column: 2; grid-row: 1; }
   .preferences-controls { grid-column: 1 / -1; grid-row: 2; margin-top: .35rem; }
   .hero { min-height: calc(100svh - 11rem); padding-block: 1rem; }
+  .hero-playing { padding-block: .5rem; }
   .intro { font-size: 1rem; }
   .rule p { font-size: .875rem; }
   .rule h2 { font-size: 1rem; }
-  .answer-panel { padding: 1.2rem; gap: 1rem; }
-  .analog-clock { width: 17rem; }
-  .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-6.15rem) rotate(calc(-1 * var(--number-angle))) !important; }
+  .answer-panel,
+  .hero-playing .answer-panel { padding: .6rem; gap: .4rem; }
+  .analog-clock,
+  .hero-playing .analog-clock { width: min(10.5rem, 22svh); }
+  .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-3.7rem) rotate(calc(-1 * var(--number-angle))) !important; }
+  .clock-instruction { bottom: 2.15rem; font-size: .55rem; }
+  .answer-heading h2 { font-size: 1.25rem; }
+  .selected-time { font-size: 1.05rem; }
+  .precision-controls { gap: .4rem; }
+  .time-stepper > div,
+  .period-control > div,
+  .time-stepper button,
+  .period-control button { min-height: 2.2rem; }
+  .confirm-button { min-height: 2.75rem; }
+  .one-guess-note { font-size: .68rem; }
   .rules-dialog { padding: 1.6rem; }
   .rules-dialog h2 { font-size: 2rem; }
   .rules-dialog p { line-height: 1.55; }
@@ -1751,6 +1783,17 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 }
 
 .clock-tutorial { display: grid; justify-items: center; gap: 1rem; padding: 1.25rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--panel); }
+.rules-dialog .clock-tutorial {
+  grid-template-columns: minmax(0, 1fr) minmax(9rem, 12rem);
+  grid-template-rows: auto auto auto;
+  align-items: start;
+  gap: .75rem 1rem;
+  padding: 1rem;
+}
+.rules-dialog .tutorial-copy { grid-column: 1; grid-row: 1 / 4; }
+.rules-dialog .tutorial-dial { grid-column: 2; grid-row: 1; }
+.rules-dialog .tutorial-feedback { grid-column: 2; grid-row: 2; }
+.rules-dialog .tutorial-reset { grid-column: 2; grid-row: 3; }
 .tutorial-copy { width: 100%; }
 .tutorial-label { color: var(--muted); font-size: .875rem; }
 .tutorial-copy h3 { margin: .4rem 0; font-size: 1.25rem; font-weight: 500; }
@@ -1760,6 +1803,8 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .tutorial-dial { width: min(100%, 19.25rem); }
 .tutorial-dial .analog-clock { width: 100%; max-width: none; }
 .tutorial-dial .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-7.1rem) rotate(calc(-1 * var(--number-angle))) !important; }
+.rules-dialog .tutorial-dial .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-4.25rem) rotate(calc(-1 * var(--number-angle))) !important; }
+.rules-dialog .tutorial-dial .clock-instruction { bottom: 2.45rem; font-size: .58rem; }
 .tutorial-feedback { text-align: center; }
 .tutorial-feedback > span { color: var(--muted); font-size: .875rem; }
 .tutorial-feedback output { display: block; color: var(--foreground); font: 1.75rem var(--font-clock); margin-top: .25rem; }
@@ -1767,12 +1812,27 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .tutorial-feedback[data-matched="true"] { border-radius: .75rem; outline: 1px solid var(--accent); padding: .75rem; }
 .tutorial-reset { min-height: 2.75rem; border: 1px solid var(--line); border-radius: 999px; padding: .5rem 1rem; background: var(--control); color: var(--foreground); cursor: pointer; font-size: .875rem; }
 .tutorial-reset:hover { border-color: var(--accent); }
-.rules-start { width: 100%; margin-top: 1.5rem; justify-content: center; }
+.rules-start { grid-column: 1 / -1; width: 100%; margin-top: 0; justify-content: center; }
 @media (max-width: 36rem) {
   .clock-tutorial { padding: 1rem .6rem; }
   .tutorial-dial { width: min(100%, 15rem); }
   .tutorial-dial .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-5.7rem) rotate(calc(-1 * var(--number-angle))) !important; }
   .tutorial-dial .clock-instruction { bottom: 2.8rem; font-size: .65rem; }
+  .rules-dialog { padding: 1rem; }
+  .rules-dialog[open] { grid-template-columns: minmax(0, 1fr); gap: .55rem; }
+  .rules-dialog h2 { font-size: 1.8rem; line-height: 1; }
+  .rules-dialog .clock-tutorial { grid-template-columns: minmax(0, 1fr) 8.25rem; gap: .5rem; padding: .7rem; }
+  .rules-dialog .tutorial-copy h3 { margin-block: .25rem; font-size: 1rem; }
+  .rules-dialog .tutorial-copy p { margin-top: .4rem; font-size: .68rem; line-height: 1.3; }
+  .rules-dialog .tutorial-label,
+  .rules-dialog .tutorial-feedback > span,
+  .rules-dialog .tutorial-feedback p { font-size: .68rem; }
+  .rules-dialog .tutorial-feedback output { margin-top: .1rem; font-size: 1.25rem; }
+  .rules-dialog .tutorial-reset { min-height: 2.2rem; padding: .35rem .5rem; font-size: .68rem; }
+  .rules-dialog .tutorial-dial .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-2.85rem) rotate(calc(-1 * var(--number-angle))) !important; }
+  .rules-dialog .tutorial-dial .clock-instruction { bottom: 1.55rem; font-size: .45rem; }
+  .rules-copy p { margin-top: .35rem; font-size: .66rem; line-height: 1.28; }
+  .rules-start { min-height: 2.75rem; padding-block: .55rem; }
 }
 .tutorial-dial .hour-hand { height: 27%; }
 .tutorial-dial .minute-hand { height: 37%; }
