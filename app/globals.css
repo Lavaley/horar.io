@@ -1660,8 +1660,10 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .start-button:hover, .confirm-button:hover:not(:disabled) { box-shadow: none; }
 .start-button svg, .confirm-button svg { background: var(--button-ink); stroke: var(--accent); }
 .start-button:disabled { opacity: .6; cursor: wait; }
-.hero-playing { padding-inline: clamp(.75rem, 1.5vw, 2rem); }
+.hero-playing { padding: .5rem clamp(.75rem, 1.5vw, 2rem); }
+.hero-playing .play-card { height: 100%; max-height: 100%; min-height: 0; }
 .play-card { width: 100%; max-width: 100rem; min-height: 0; grid-template-columns: minmax(0, 1.5fr) minmax(24rem, 1fr); }
+.hero-playing .round-photo { min-height: 0; }
 .round-photo { min-height: 36rem; }
 .photo-meta { pointer-events: none; }
 .photo-meta h1 { color: #fff7ed; }
@@ -1858,3 +1860,142 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .daily-ranking p { margin: .45rem 0; color: var(--foreground); font-size: 1rem; line-height: 1.55; }
 .daily-ranking strong { color: var(--accent-bright); font-family: var(--font-clock); font-size: 1.2rem; }
 .daily-ranking small { display: block; color: var(--muted); font-size: .875rem; line-height: 1.5; }
+
+/* The completed round reserves its full composition inside the same card size. */
+.daily-completed .answer-panel {
+  align-items: stretch;
+  gap: .65rem;
+  padding: clamp(.75rem, 1.6vw, 1.25rem);
+}
+
+.daily-completed .analog-clock {
+  order: 2;
+  align-self: center;
+  width: min(15.5rem, 36svh);
+}
+
+.daily-completed .clock-numbers > span {
+  transform: rotate(var(--number-angle)) translateY(-5.5rem) rotate(calc(-1 * var(--number-angle))) !important;
+}
+
+.daily-completed .daily-feedback {
+  order: 1;
+}
+
+.daily-completed .daily-ranking {
+  order: 3;
+  padding: .9rem 1rem;
+}
+
+.daily-completed .return-tomorrow {
+  order: 4;
+}
+
+.daily-completed .round-result { padding: 1rem 1.15rem; }
+.daily-completed .round-result-copy > strong { font-size: 2rem; }
+.daily-completed .round-result-copy > span,
+.daily-completed .round-result-copy p,
+.daily-completed .round-points > span { font-size: .85rem; }
+.daily-completed .round-points > strong { font-size: 2.3rem; }
+.daily-completed .daily-ranking > span { font-size: .95rem; }
+.daily-completed .daily-ranking p { font-size: 1.05rem; }
+.daily-completed .daily-ranking small { font-size: .9rem; }
+.daily-completed .return-tomorrow > p { font-size: .95rem; }
+.daily-completed .daily-stats {
+  margin-top: .6rem;
+  padding-top: .6rem;
+}
+.daily-completed .daily-stats span,
+.daily-completed .daily-stats small { font-size: .8rem; }
+.daily-completed .daily-stats strong { font-size: 1.5rem; }
+
+@media (max-height: 56rem) and (min-width: 50.01rem) {
+  .daily-completed .answer-panel { gap: .45rem; padding: .65rem; }
+  .daily-completed .analog-clock { width: min(14.5rem, 32svh); }
+  .daily-completed .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-5.1rem) rotate(calc(-1 * var(--number-angle))) !important; }
+  .daily-completed .round-result { padding: .75rem .9rem; }
+  .daily-completed .round-result-copy > strong { font-size: 1.85rem; }
+  .daily-completed .round-result-copy > span,
+  .daily-completed .round-result-copy p,
+  .daily-completed .round-points > span { font-size: .78rem; }
+  .daily-completed .round-points > strong { font-size: 2.1rem; }
+  .daily-completed .daily-ranking { padding: .7rem .8rem; }
+  .daily-completed .daily-ranking > span { font-size: .9rem; }
+  .daily-completed .daily-ranking p { font-size: 1rem; }
+  .daily-completed .daily-ranking small { font-size: .85rem; }
+  .daily-completed .return-tomorrow > p { font-size: .85rem; }
+  .daily-completed .daily-stats { margin-top: .45rem; padding-top: .45rem; }
+  .daily-completed .daily-stats span,
+  .daily-completed .daily-stats small { font-size: .75rem; }
+  .daily-completed .daily-stats strong { font-size: 1.35rem; }
+}
+
+@media (max-height: 46rem) and (min-width: 50.01rem) {
+  .hero-playing { padding-block: .5rem; }
+  .hero-playing .answer-panel { gap: .5rem; padding: .75rem; }
+  .hero-playing .analog-clock { width: min(15rem, 34svh); }
+  .hero-playing .time-stepper > div,
+  .hero-playing .period-control > div,
+  .hero-playing .time-stepper button,
+  .hero-playing .period-control button { min-height: 2.2rem; }
+  .hero-playing .confirm-button { min-height: 2.75rem; }
+  .hero-playing .one-guess-note { font-size: .7rem; }
+  .daily-completed .answer-panel { gap: .35rem; padding: .5rem .7rem; }
+  .daily-completed .analog-clock { width: min(11.5rem, 26svh); }
+  .daily-completed .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-4rem) rotate(calc(-1 * var(--number-angle))) !important; }
+  .daily-completed .round-result { padding: .55rem .7rem; }
+  .daily-completed .round-result-copy > strong { font-size: 1.5rem; }
+  .daily-completed .round-result-copy > span,
+  .daily-completed .round-result-copy p,
+  .daily-completed .round-points > span { font-size: .7rem; line-height: 1.3; }
+  .daily-completed .round-points > strong { font-size: 1.65rem; }
+  .daily-completed .daily-ranking { padding: .55rem .7rem; }
+  .daily-completed .daily-ranking > span,
+  .daily-completed .daily-ranking small { font-size: .72rem; line-height: 1.3; }
+  .daily-completed .daily-ranking p { margin: .3rem 0; font-size: .8rem; line-height: 1.3; }
+  .daily-completed .return-tomorrow > p { margin-bottom: .15rem; font-size: .72rem; line-height: 1.3; }
+  .daily-completed .daily-stats { margin-top: .35rem; padding-top: .35rem; }
+  .daily-completed .daily-stats span,
+  .daily-completed .daily-stats small { font-size: .65rem; }
+  .daily-completed .daily-stats strong { margin: .1rem 0; font-size: 1rem; }
+}
+
+@media (max-width: 50rem) {
+  .hero-playing .play-card.daily-completed {
+    grid-template-rows: minmax(5rem, 18%) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 36rem) {
+  .daily-completed .answer-panel {
+    gap: .35rem;
+    padding: .45rem .6rem;
+  }
+
+  .daily-completed .analog-clock { width: min(10.5rem, 24svh); }
+  .daily-completed .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-3.7rem) rotate(calc(-1 * var(--number-angle))) !important; }
+  .daily-completed .round-result { padding: .55rem .65rem; gap: .5rem; }
+  .daily-completed .round-result-copy > strong { font-size: 1.5rem; }
+  .daily-completed .round-result-copy > span,
+  .daily-completed .round-result-copy p,
+  .daily-completed .round-points > span { font-size: .68rem; line-height: 1.25; }
+  .daily-completed .round-points { min-width: 3.5rem; padding-left: .6rem; }
+  .daily-completed .round-points > strong { font-size: 1.6rem; }
+  .daily-completed .daily-ranking { padding: .55rem .65rem; }
+  .daily-completed .daily-ranking > span,
+  .daily-completed .daily-ranking small { font-size: .68rem; line-height: 1.25; }
+  .daily-completed .daily-ranking p { margin: .25rem 0; font-size: .78rem; line-height: 1.25; }
+  .daily-completed .daily-ranking strong { font-size: .95rem; }
+  .daily-completed .return-tomorrow > p { margin-bottom: .15rem; font-size: .7rem; line-height: 1.25; }
+  .daily-completed .daily-stats { gap: .5rem; margin-top: .35rem; padding-top: .35rem; }
+  .daily-completed .daily-stats span,
+  .daily-completed .daily-stats small { font-size: .62rem; }
+  .daily-completed .daily-stats strong { margin: .1rem 0; font-size: 1rem; }
+}
+
+@media (max-height: 46rem) and (max-width: 50rem) {
+  .hero-playing .play-card.daily-completed { grid-template-rows: minmax(3.5rem, 10%) minmax(0, 1fr); }
+  .daily-completed .answer-panel { gap: .25rem; padding: .35rem .5rem; }
+  .daily-completed .analog-clock { width: min(8.5rem, 20svh); }
+  .daily-completed .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-2.9rem) rotate(calc(-1 * var(--number-angle))) !important; }
+}
