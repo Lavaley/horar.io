@@ -9,12 +9,19 @@ const manifestPath = path.resolve(process.argv[2] ?? path.join(root, "photo-libr
 const startDate = process.argv[3] ?? new Date(Date.now() - 10_800_000).toISOString().slice(0, 10);
 const production = process.argv.includes("--prod");
 const entries = JSON.parse(await readFile(manifestPath, "utf8"));
+let photoInfo = {};
+try {
+  photoInfo = JSON.parse(await readFile(path.join(path.dirname(manifestPath), "locations.json"), "utf8"));
+} catch (error) {
+  if (error?.code !== "ENOENT") throw error;
+}
 function run(name, args) {
   // No shell interpolation and no admin credential printed or passed to the browser.
   const response = execFileSync(process.execPath, [path.join(root, "node_modules/convex/bin/main.js"), "run", name, JSON.stringify(args), ...(production ? ["--prod"] : [])], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   return JSON.parse(response);
 }
 for (const [index, entry] of entries.entries()) {
+  const info = photoInfo[String(entry.sourcePageId)] ?? {};
   const challengeDate = entry.challengeDate ?? new Date(Date.parse(`${startDate}T12:00:00Z`) + index * 86_400_000).toISOString().slice(0, 10);
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(entry.correctTime)) throw new Error(`Invalid time at entry ${index + 1}`);
   if (run("admin:hasDate", { challengeDate })) { console.log(`${challengeDate}: already scheduled; preserved.`); continue; }
@@ -29,6 +36,6 @@ for (const [index, entry] of entries.entries()) {
   const { storageId } = await uploaded.json();
   const [hour, minute] = entry.correctTime.split(":").map(Number);
   const capturedDate = entry.capturedDate ?? entry.capturedAt?.slice(0, 10).replaceAll(":", "-");
-  run("admin:schedule", { image: { provider: "convex", storageId }, challengeDate, correctMinutes: hour * 60 + minute, ...(capturedDate ? { capturedDate } : {}), ...(entry.city ? { city: entry.city } : {}), ...(entry.state ? { state: entry.state } : {}), ...(entry.country ? { country: entry.country } : {}), ...(entry.alt ? { alt: entry.alt } : {}), ...(entry.objectPosition ? { objectPosition: entry.objectPosition } : {}), ...(entry.credit ? { credit: entry.credit } : {}), ...(entry.creditUrl ? { creditUrl: entry.creditUrl } : {}) });
+  run("admin:schedule", { image: { provider: "convex", storageId }, challengeDate, correctMinutes: hour * 60 + minute, ...(capturedDate ? { capturedDate } : {}), ...(entry.city ?? info.city ? { city: entry.city ?? info.city } : {}), ...(entry.state ?? info.state ? { state: entry.state ?? info.state } : {}), ...(entry.country ?? info.country ? { country: entry.country ?? info.country } : {}), ...(entry.alt ? { alt: entry.alt } : {}), ...(entry.objectPosition ? { objectPosition: entry.objectPosition } : {}), ...(entry.credit ? { credit: entry.credit } : {}), ...(entry.creditUrl ? { creditUrl: entry.creditUrl } : {}) });
   console.log(`${challengeDate}: photograph uploaded and scheduled.`);
 }

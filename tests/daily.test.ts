@@ -15,7 +15,7 @@ async function setup() {
   vi.setSystemTime(new Date("2026-09-05T15:00:00Z"));
   const t = convexTest(schema, modules);
   aggregateTest.register(t, "dailyRanking");
-  const id = await t.run(ctx => ctx.db.insert("photographs", { image: { provider: "external", url: "https://example.com/photo.jpg" }, challengeDate: "2026-09-05", correctMinutes: 665, capturedDate: "2025-08-14", city: "São Paulo", state: "SP", country: "Brasil" }));
+  const id = await t.run(ctx => ctx.db.insert("photographs", { image: { provider: "external", url: "https://example.com/photo.jpg" }, challengeDate: "2026-09-05", correctMinutes: 665, capturedDate: "2025-08-14", city: "São Paulo", state: "SP", country: "Brasil", creditUrl: "https://commons.wikimedia.org/wiki/File:Photo.jpg" }));
   return { t, id };
 }
 
@@ -39,6 +39,13 @@ describe("1000-point score and Brasília calendar", () => {
 });
 
 describe("Convex daily game", () => {
+  it("backfills source photo information idempotently", async () => {
+    const { t } = await setup();
+    const entry = { creditUrl: "https://commons.wikimedia.org/wiki/File:Photo.jpg", capturedDate: "2024-06-22", city: "Vang Vieng", state: "Província de Vientiane", country: "Laos" };
+    expect(await t.mutation(internal.admin.backfillPhotoInfo, { entries: [entry] })).toEqual({ updated: 1, missing: [] });
+    expect(await t.mutation(internal.admin.backfillPhotoInfo, { entries: [entry] })).toEqual({ updated: 0, missing: [] });
+    expect((await t.mutation(api.challenges.current, {})).photo).toMatchObject(entry);
+  });
   it("returns the same photo to everyone, with no answer before a guess", async () => {
     const { t, id } = await setup();
     const first = await t.mutation(api.challenges.current, {});

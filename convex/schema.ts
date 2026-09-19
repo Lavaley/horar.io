@@ -24,7 +24,9 @@ export default defineSchema({
     objectPosition: v.optional(v.string()),
     credit: v.optional(v.string()),
     creditUrl: v.optional(v.string()),
-  }).index("by_date", ["challengeDate"]),
+  })
+    .index("by_date", ["challengeDate"])
+    .index("by_credit_url", ["creditUrl"]),
   // Anonymous, per-browser receipts make retries and concurrent tabs idempotent.
   // No accounts, personal data, or public access to other receipts.
   guesses: defineTable({

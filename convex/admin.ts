@@ -34,6 +34,46 @@ export const hasDate = internalMutation({
   handler: async (ctx, args) => !!await ctx.db.query("photographs").withIndex("by_date", q => q.eq("challengeDate", args.challengeDate)).unique(),
 });
 
+export const backfillPhotoInfo = internalMutation({
+  args: {
+    entries: v.array(v.object({
+      creditUrl: v.string(),
+      capturedDate: v.string(),
+      city: v.optional(v.string()),
+      state: v.optional(v.string()),
+      country: v.optional(v.string()),
+    })),
+  },
+  returns: v.object({ updated: v.number(), missing: v.array(v.string()) }),
+  handler: async (ctx, args) => {
+    let updated = 0;
+    const missing: string[] = [];
+    for (const entry of args.entries) {
+      const captured = Date.parse(`${entry.capturedDate}T12:00:00Z`);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.capturedDate) || !Number.isFinite(captured) || new Date(captured).toISOString().slice(0, 10) !== entry.capturedDate) throw new ConvexError("INVALID_CAPTURED_DATE");
+      if (!entry.creditUrl.startsWith("https://") || [entry.city, entry.state, entry.country].some(value => value !== undefined && (!value.trim() || value.length > 100))) throw new ConvexError("INVALID_PHOTO_INFO");
+      const photo = await ctx.db.query("photographs").withIndex("by_credit_url", q => q.eq("creditUrl", entry.creditUrl)).unique();
+      if (!photo) {
+        missing.push(entry.creditUrl);
+        continue;
+      }
+      const changed = photo.capturedDate !== entry.capturedDate
+        || (entry.city !== undefined && photo.city !== entry.city)
+        || (entry.state !== undefined && photo.state !== entry.state)
+        || (entry.country !== undefined && photo.country !== entry.country);
+      if (!changed) continue;
+      await ctx.db.patch(photo._id, {
+        capturedDate: entry.capturedDate,
+        ...(entry.city === undefined ? {} : { city: entry.city }),
+        ...(entry.state === undefined ? {} : { state: entry.state }),
+        ...(entry.country === undefined ? {} : { country: entry.country }),
+      });
+      updated += 1;
+    }
+    return { updated, missing };
+  },
+});
+
 export const schedule = internalMutation({
   returns: v.id("photographs"),
   args: {

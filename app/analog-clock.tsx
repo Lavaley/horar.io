@@ -40,9 +40,13 @@ export function getContinuousHandAngles(
 
 export function scoreColor(score: number) {
   const percentage = Math.max(0, Math.min(100, score / 10));
-  const hue = percentage * 1.2;
-  const lightness = 48 + Math.sin((percentage / 100) * Math.PI) * 5;
-  return `hsl(${hue} 78% ${lightness}%)`;
+  // Keep most of the scale in red, orange, and yellow. Green is reserved
+  // for the closest 20% so the result ring communicates distance clearly.
+  const hue = percentage <= 80
+    ? 4 + percentage * 0.6
+    : 52 + (percentage - 80) * 3.4;
+  const lightness = 47 + Math.sin((percentage / 100) * Math.PI) * 6;
+  return `hsl(${hue} 82% ${lightness}%)`;
 }
 
 type AnalogClockProps = {
@@ -158,7 +162,8 @@ function ScoreRadial({
             directDifference,
             720 - directDifference,
           );
-          const proximity = Math.max(0, 1 - difference / 720);
+          // On a 12-hour dial, 360 minutes is the farthest visible point.
+          const proximity = Math.max(0, 1 - difference / 360);
 
           return (
             <circle
@@ -173,7 +178,7 @@ function ScoreRadial({
                 SCORE_RING_CIRCUMFERENCE - SCORE_SEGMENT_LENGTH
               }`}
               strokeLinecap="round"
-              opacity={0.2 + proximity * 0.68}
+              opacity={0.35 + proximity * 0.55}
               transform={`rotate(${segmentMinute * 0.5 - 90} 160 160)`}
             />
           );
