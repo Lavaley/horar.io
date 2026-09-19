@@ -39,7 +39,7 @@ export function getContinuousHandAngles(
 }
 
 export function scoreColor(score: number) {
-  const percentage = Math.max(0, Math.min(100, score));
+  const percentage = Math.max(0, Math.min(100, score / 10));
   const hue = percentage * 1.2;
   const lightness = 48 + Math.sin((percentage / 100) * Math.PI) * 5;
   return `hsl(${hue} 78% ${lightness}%)`;
@@ -158,7 +158,7 @@ function ScoreRadial({
             directDifference,
             720 - directDifference,
           );
-          const proximity = Math.max(0, 1 - difference / 120);
+          const proximity = Math.max(0, 1 - difference / 720);
 
           return (
             <circle
@@ -167,7 +167,7 @@ function ScoreRadial({
               cy="160"
               r={SCORE_RING_RADIUS}
               fill="none"
-              stroke={scoreColor(proximity * 100)}
+              stroke={scoreColor(proximity * 1000)}
               strokeWidth="11"
               strokeDasharray={`${SCORE_SEGMENT_LENGTH} ${
                 SCORE_RING_CIRCUMFERENCE - SCORE_SEGMENT_LENGTH
@@ -347,4 +347,3 @@ export function AnalogClock({
     </div>
   );
 }
-

@@ -38,6 +38,7 @@ export const schedule = internalMutation({
   returns: v.id("photographs"),
   args: {
     image: imageAsset, challengeDate: v.string(), correctMinutes: v.number(),
+    capturedDate: v.optional(v.string()), city: v.optional(v.string()), state: v.optional(v.string()), country: v.optional(v.string()),
     alt: v.optional(v.object({ pt: v.string(), en: v.string() })),
     objectPosition: v.optional(v.string()), credit: v.optional(v.string()), creditUrl: v.optional(v.string()),
   },
@@ -45,6 +46,11 @@ export const schedule = internalMutation({
     const parsed = Date.parse(`${args.challengeDate}T12:00:00Z`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(args.challengeDate) || !Number.isFinite(parsed) || new Date(parsed).toISOString().slice(0, 10) !== args.challengeDate) throw new ConvexError("INVALID_DATE");
     if (args.challengeDate < brasiliaDay(Date.now())) throw new ConvexError("PAST_DATE");
+    if (args.capturedDate) {
+      const captured = Date.parse(`${args.capturedDate}T12:00:00Z`);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(args.capturedDate) || !Number.isFinite(captured) || new Date(captured).toISOString().slice(0, 10) !== args.capturedDate) throw new ConvexError("INVALID_CAPTURED_DATE");
+    }
+    if ([args.city, args.state, args.country].some(value => value !== undefined && (!value.trim() || value.length > 100))) throw new ConvexError("INVALID_LOCATION");
     if (!Number.isInteger(args.correctMinutes) || args.correctMinutes < 0 || args.correctMinutes >= 1440) throw new ConvexError("INVALID_TIME");
     for (const url of [args.creditUrl, args.image.provider === "external" ? args.image.url : undefined]) {
       if (url && !url.startsWith("https://")) throw new ConvexError("HTTPS_REQUIRED");

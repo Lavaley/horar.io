@@ -15,12 +15,12 @@ async function setup() {
   vi.setSystemTime(new Date("2026-09-05T15:00:00Z"));
   const t = convexTest(schema, modules);
   aggregateTest.register(t, "dailyRanking");
-  const id = await t.run(ctx => ctx.db.insert("photographs", { image: { provider: "external", url: "https://example.com/photo.jpg" }, challengeDate: "2026-09-05", correctMinutes: 665 }));
+  const id = await t.run(ctx => ctx.db.insert("photographs", { image: { provider: "external", url: "https://example.com/photo.jpg" }, challengeDate: "2026-09-05", correctMinutes: 665, capturedDate: "2025-08-14", city: "São Paulo", state: "SP", country: "Brasil" }));
   return { t, id };
 }
 
-describe("original score and Brasília calendar", () => {
-  it.each([[665, 665, 0, 100], [664, 665, 1, 99], [605, 665, 60, 50], [545, 665, 120, 0], [0, 720, 720, 0], [1439, 1, 2, 98]])("scores %i against %i", (chosen, correct, difference, score) => {
+describe("1000-point score and Brasília calendar", () => {
+  it.each([[665, 665, 0, 1000], [664, 665, 1, 999], [605, 665, 60, 917], [545, 665, 120, 833], [1, 720, 719, 1], [0, 720, 720, 0], [1439, 1, 2, 997]])("scores %i against %i", (chosen, correct, difference, score) => {
     expect(scoreGuess(chosen, correct)).toEqual({ difference, score });
   });
   it("changes the daily challenge at 03:00 UTC, across months and years", () => {
@@ -44,6 +44,7 @@ describe("Convex daily game", () => {
     const first = await t.mutation(api.challenges.current, {});
     expect(first).toEqual(await t.mutation(api.challenges.current, {}));
     expect(first.photo?.id).toBe(id);
+    expect(first.photo).toMatchObject({ capturedDate: "2025-08-14", city: "São Paulo", state: "SP", country: "Brasil" });
     expect(JSON.stringify(first)).not.toMatch(/correctMinutes|665|11:05/);
     expect(await t.mutation(api.challenges.result, { playerToken, date: first.date })).toBeNull();
   });
@@ -51,7 +52,7 @@ describe("Convex daily game", () => {
     const { t, id } = await setup();
     const args = { playerToken, date: "2026-09-05", photographId: id, chosenMinutes: 605 };
     const result = await t.mutation(api.challenges.submit, args);
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(917);
     expect(result.correctMinutes).toBe(665);
     expect(await t.mutation(api.challenges.submit, { ...args, chosenMinutes: 665 })).toEqual(result);
     expect(await t.mutation(api.challenges.result, { playerToken: "bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb", date: args.date })).toBeNull();
@@ -75,7 +76,7 @@ describe("Convex daily game", () => {
     expect((await t.mutation(api.challenges.current, {})).photo?.id).toBe(nextId);
     expect(await t.mutation(api.challenges.submit, { playerToken, date: first.date, photographId: id, chosenMinutes: 10 })).toEqual(first);
     const next = await t.mutation(api.challenges.submit, { playerToken, date: "2026-09-06", photographId: nextId, chosenMinutes: 600 });
-    expect(next.score).toBe(100);
+    expect(next.score).toBe(1000);
     expect(next.ranking).toEqual({ position: 1, total: 1 });
   });
   it("has an honest empty state and does not repeat an old photo", async () => {
@@ -110,7 +111,7 @@ describe("perpetual photo rotation", () => {
       expect(JSON.stringify(current)).not.toContain("correctMinutes");
       await expect(t.mutation(api.challenges.submit, { playerToken, date: current.date, photographId: ids[(day + 1) % 50], chosenMinutes: 600 })).rejects.toThrow("CHALLENGE_CHANGED");
       const result = await t.mutation(api.challenges.submit, { playerToken, date: current.date, photographId: ids[day % 50], chosenMinutes: 600 + day % 50 });
-      expect(result.score).toBe(100);
+      expect(result.score).toBe(1000);
       expect(result.ranking).toEqual({ position: 1, total: 1 });
     }
     expect(await t.mutation(api.challenges.result, { playerToken, date: first.date })).toEqual(first);
@@ -138,7 +139,7 @@ describe("daily ranking", () => {
     await submit(3, 665);
     expect((await submit(4, 605)).ranking).toEqual({ position: 3, total: 4 });
     expect((await submit(1, 665)).ranking).toEqual({ position: 4, total: 4 });
-    expect((await submit(1, 665)).score).toBe(0);
+    expect((await submit(1, 665)).score).toBe(76);
     expect((await t.mutation(api.challenges.result, { playerToken: tokenFor(2), date: "2026-09-05" }))?.ranking).toEqual({ position: 1, total: 4 });
     expect(await t.mutation(api.challenges.result, { playerToken: tokenFor(9), date: "2026-09-05" })).toBeNull();
   });

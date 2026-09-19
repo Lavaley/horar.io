@@ -29,6 +29,24 @@ function Stepper({ label, value, onDecrease, onIncrease, disabled }: { label: st
   return <div className="time-stepper"><span>{label}</span><div><button type="button" aria-label={`${text.decrease} ${label.toLowerCase()}`} onClick={onDecrease} disabled={disabled}>−</button><strong>{value}</strong><button type="button" aria-label={`${text.increase} ${label.toLowerCase()}`} onClick={onIncrease} disabled={disabled}>+</button></div></div>;
 }
 
+function PhotoInformation({ photo, language }: { photo: DailyChallenge["photo"]; language: "pt" | "en" }) {
+  const { text } = usePreferences();
+  if (!photo) return null;
+  const capturedDate = photo.capturedDate
+    ? new Intl.DateTimeFormat(language === "pt" ? "pt-BR" : "en", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${photo.capturedDate}T12:00:00Z`))
+    : text.unavailableInfo;
+  const location = [photo.city, photo.state].filter(Boolean).join(", ") || text.unavailableInfo;
+
+  return <section className="photo-information" aria-labelledby="photo-information-title">
+    <h2 id="photo-information-title">{text.information}:</h2>
+    <dl>
+      <div><dt>{text.capturedDate}</dt><dd>{capturedDate}</dd></div>
+      <div><dt>{text.location}</dt><dd>{location}</dd></div>
+      <div><dt>{text.country}</dt><dd>{photo.country || text.unavailableInfo}</dd></div>
+    </dl>
+  </section>;
+}
+
 function ReturnTomorrow({ challenge, now, streak }: { challenge: DailyChallenge; now: number; streak: number }) {
   const { text } = usePreferences();
   const seconds = Math.max(0, Math.ceil((challenge.nextReleaseAt - now) / 1000));
@@ -87,6 +105,7 @@ function GameRound({ game }: { game: ReturnType<typeof useDailyGame> }) {
       {challenge.photo.credit && <p className="photo-credit">{text.credit}: {challenge.photo.creditUrl ? <a href={challenge.photo.creditUrl} target="_blank" rel="noreferrer">{challenge.photo.credit}</a> : challenge.photo.credit}</p>}
     </div>
     <div className="answer-panel" aria-busy={submitting || revealing}>
+      <PhotoInformation photo={challenge.photo} language={language} />
       {!shownResult && <div className="answer-heading"><div><p className="eyebrow compact-eyebrow"><span aria-hidden="true" />{text.perception}</p><h2>{text.adjust}</h2></div><strong className="selected-time" aria-live="polite">{formatTime(selectedTime)}</strong></div>}
       <AnalogClock time={selectedTime} handAngles={pending && !result ? getHandAngles(pending.chosenMinutes) : handAngles} isAnimating={revealing} isLocked={locked} scoreVisualization={shownResult ? { correctTime: result.correctMinutes, chosenTime: result.chosenMinutes, score: result.score } : null} onTimeChange={chooseTime} onTick={playTick} />
       {!shownResult && <div className="precision-controls" role="group" aria-label={text.precision}>

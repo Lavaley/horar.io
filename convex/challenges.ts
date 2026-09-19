@@ -39,6 +39,7 @@ export const current = mutation({
     date: v.string(), serverNow: v.number(), nextReleaseAt: v.number(),
     photo: v.union(v.null(), v.object({
       id: v.id("photographs"), image: v.string(),
+      capturedDate: v.union(v.null(), v.string()), city: v.union(v.null(), v.string()), state: v.union(v.null(), v.string()), country: v.union(v.null(), v.string()),
       alt: v.union(v.null(), v.object({ pt: v.string(), en: v.string() })),
       objectPosition: v.string(), credit: v.union(v.null(), v.string()),
       creditUrl: v.union(v.null(), v.string()),
@@ -54,6 +55,7 @@ export const current = mutation({
       // Explicit projection: never serialize the private photograph document.
       photo: photo && image ? {
         id: photo._id, image, alt: photo.alt ?? null,
+        capturedDate: photo.capturedDate ?? null, city: photo.city ?? null, state: photo.state ?? null, country: photo.country ?? null,
         objectPosition: photo.objectPosition ?? "center",
         credit: photo.credit ?? null, creditUrl: photo.creditUrl ?? null,
       } : null,

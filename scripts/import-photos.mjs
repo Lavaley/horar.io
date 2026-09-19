@@ -28,6 +28,7 @@ for (const [index, entry] of entries.entries()) {
   if (!uploaded.ok) throw new Error(`Upload failed (${uploaded.status})`);
   const { storageId } = await uploaded.json();
   const [hour, minute] = entry.correctTime.split(":").map(Number);
-  run("admin:schedule", { image: { provider: "convex", storageId }, challengeDate, correctMinutes: hour * 60 + minute, ...(entry.alt ? { alt: entry.alt } : {}), ...(entry.objectPosition ? { objectPosition: entry.objectPosition } : {}), ...(entry.credit ? { credit: entry.credit } : {}), ...(entry.creditUrl ? { creditUrl: entry.creditUrl } : {}) });
+  const capturedDate = entry.capturedDate ?? entry.capturedAt?.slice(0, 10).replaceAll(":", "-");
+  run("admin:schedule", { image: { provider: "convex", storageId }, challengeDate, correctMinutes: hour * 60 + minute, ...(capturedDate ? { capturedDate } : {}), ...(entry.city ? { city: entry.city } : {}), ...(entry.state ? { state: entry.state } : {}), ...(entry.country ? { country: entry.country } : {}), ...(entry.alt ? { alt: entry.alt } : {}), ...(entry.objectPosition ? { objectPosition: entry.objectPosition } : {}), ...(entry.credit ? { credit: entry.credit } : {}), ...(entry.creditUrl ? { creditUrl: entry.creditUrl } : {}) });
   console.log(`${challengeDate}: photograph uploaded and scheduled.`);
 }

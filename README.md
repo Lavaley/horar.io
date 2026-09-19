@@ -58,7 +58,7 @@ A interface está disponível em **Português do Brasil (PT-BR)** e **Inglês (E
 
 ## Demais mecânicas
 
-Após o envio do palpite, o horário exato da fotografia é revelado e a pontuação é calculada com base na diferença entre os dois horários. Um acerto exato vale **100 pontos**. A pontuação diminui gradualmente conforme a distância aumenta e chega a zero quando o palpite está a duas horas ou mais do horário correto. O cálculo sempre considera o menor intervalo dentro de um ciclo de 24 horas, inclusive quando a diferença atravessa a meia-noite.
+Após o envio do palpite, o horário exato da fotografia é revelado e a pontuação é calculada com base na diferença entre os dois horários. Um acerto exato vale **1000 pontos**. A pontuação diminui gradualmente conforme a distância aumenta e chega a zero somente quando o palpite está exatamente 12 horas distante do horário correto. O cálculo sempre considera o menor intervalo dentro de um ciclo de 24 horas, inclusive quando a diferença atravessa a meia-noite.
 
 <div align="center">
   <img src="docs/readme-assets/resultado-pontuacao.png" alt="Relógio de resultado com arco de precisão e pontuação" width="460">
