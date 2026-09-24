@@ -1767,14 +1767,13 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .guess-dialog-question { margin: 0; color: var(--muted); font-size: 1.05rem; line-height: 1.6; }
 .guess-dialog-question strong { color: var(--accent-bright); font-family: var(--font-clock); font-size: 1.3em; font-weight: 600; white-space: nowrap; }
 .guess-dialog-warning { margin: .9rem 0 0; padding-top: .9rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; line-height: 1.5; }
-.guess-dialog-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .75rem; margin-top: 1.5rem; }
+.guess-dialog-actions { display: flex; align-items: stretch; gap: .75rem; margin-top: 1.5rem; }
 .guess-adjust-button { min-height: 3.15rem; padding: .7rem 1rem; border: 1px solid var(--line); border-radius: 999px; background: var(--control); color: var(--foreground); cursor: pointer; font-size: .8rem; font-weight: 650; }
 .guess-adjust-button:hover { border-color: var(--accent); color: var(--accent-bright); }
-.guess-dialog .confirm-button { min-width: 0; }
+.guess-dialog .confirm-button { flex: 1; min-width: 0; width: auto; gap: .5rem; padding-inline: 1rem .75rem; }
 @media (max-width: 32rem) {
-  .guess-dialog-actions { grid-template-columns: 1fr; }
+  .guess-dialog-actions { flex-direction: column; }
   .guess-dialog .confirm-button, .guess-adjust-button { width: 100%; }
-  .guess-adjust-button { grid-row: 2; }
 }
 @media (max-width: 68rem) { .game-label { display: none; } }
 @media (max-width: 50rem) {
