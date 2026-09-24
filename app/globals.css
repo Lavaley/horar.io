@@ -1932,6 +1932,10 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 .daily-ranking small { display: block; color: var(--muted); font-size: .875rem; line-height: 1.5; }
 
 /* The completed round reserves its full composition inside the same card size. */
+.daily-completed .photo-information h2 { font-size: 1.08rem; }
+.daily-completed .photo-information dt { font-size: .7rem; }
+.daily-completed .photo-information dd { font-size: .88rem; }
+
 .daily-completed .answer-panel {
   align-items: stretch;
   gap: .65rem;
@@ -1962,22 +1966,24 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 }
 
 .daily-completed .round-result { padding: 1rem 1.15rem; }
-.daily-completed .round-result-copy > strong { font-size: 2rem; }
+.daily-completed .round-result-copy > strong { font-size: 2.15rem; }
 .daily-completed .round-result-copy > span,
 .daily-completed .round-result-copy p,
-.daily-completed .round-points > span { font-size: .85rem; }
-.daily-completed .round-points > strong { font-size: 2.3rem; }
-.daily-completed .daily-ranking > span { font-size: .95rem; }
-.daily-completed .daily-ranking p { font-size: 1.05rem; }
-.daily-completed .daily-ranking small { font-size: .9rem; }
-.daily-completed .return-tomorrow > p { font-size: .95rem; }
+.daily-completed .round-points > span { font-size: .9rem; }
+.daily-completed .chosen-time-result > span { font-size: .85rem; }
+.daily-completed .chosen-time-result > strong { font-size: 1.3rem; }
+.daily-completed .round-points > strong { font-size: 2.5rem; }
+.daily-completed .daily-ranking > span { font-size: 1.02rem; }
+.daily-completed .daily-ranking p { font-size: 1.1rem; }
+.daily-completed .daily-ranking small { font-size: .98rem; }
+.daily-completed .return-tomorrow > p { font-size: 1.02rem; }
 .daily-completed .daily-stats {
   margin-top: .6rem;
   padding-top: .6rem;
 }
 .daily-completed .daily-stats span,
-.daily-completed .daily-stats small { font-size: .8rem; }
-.daily-completed .daily-stats strong { font-size: 1.5rem; }
+.daily-completed .daily-stats small { font-size: .87rem; }
+.daily-completed .daily-stats strong { font-size: 1.65rem; }
 
 @media (max-width: 36rem) {
   .daily-completed .answer-panel {
@@ -1985,12 +1991,21 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
     padding: .8rem;
   }
 
+  .daily-completed .photo-information h2 { font-size: .9rem; }
+  .daily-completed .photo-information dt { font-size: .65rem; }
+  .daily-completed .photo-information dd { font-size: .8rem; }
   .daily-completed .analog-clock { width: min(12rem, 60vw); }
   .daily-completed .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-4.2rem) rotate(calc(-1 * var(--number-angle))) !important; }
   .daily-completed .round-result { gap: .6rem; }
   .daily-completed .round-result-copy > strong { font-size: 1.7rem; }
+  .daily-completed .round-result-copy > span,
+  .daily-completed .round-result-copy p,
+  .daily-completed .round-points > span { font-size: .8rem; }
   .daily-completed .round-points { min-width: 3.5rem; padding-left: .6rem; }
   .daily-completed .round-points > strong { font-size: 1.8rem; }
+  .daily-completed .daily-ranking > span { font-size: .95rem; }
+  .daily-completed .daily-ranking p { font-size: 1.02rem; }
+  .daily-completed .daily-ranking small { font-size: .88rem; }
   .daily-completed .daily-ranking { padding: .8rem; }
   .daily-completed .daily-stats { gap: .5rem; }
 }
@@ -2045,6 +2060,9 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 
 @media (min-width: 75rem) and (max-height: 48rem) {
   .daily-completed .answer-panel { gap: .45rem .75rem; padding: .65rem; }
+  .daily-completed .photo-information h2 { font-size: .95rem; }
+  .daily-completed .photo-information dt { font-size: .62rem; }
+  .daily-completed .photo-information dd { font-size: .78rem; }
   .daily-completed .analog-clock { width: 11.5rem; }
   .daily-completed .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-4rem) rotate(calc(-1 * var(--number-angle))) !important; }
   .daily-completed .clock-instruction { bottom: 1.85rem; }
@@ -2053,9 +2071,16 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
   .daily-completed .round-result-copy > span,
   .daily-completed .round-result-copy p,
   .daily-completed .round-points > span { font-size: .78rem; }
+  .daily-completed .chosen-time-result > span { font-size: .75rem; }
+  .daily-completed .chosen-time-result > strong { font-size: 1.2rem; }
+  .daily-completed .round-points > strong { font-size: 2.3rem; }
   .daily-completed .daily-ranking { padding: .65rem; }
+  .daily-completed .daily-ranking > span { font-size: .95rem; }
   .daily-completed .daily-ranking p { margin: .3rem 0; font-size: .95rem; line-height: 1.35; }
   .daily-completed .daily-ranking small { font-size: .8rem; line-height: 1.35; }
   .daily-completed .return-tomorrow > p { font-size: .85rem; line-height: 1.35; }
   .daily-completed .daily-stats { margin-top: .4rem; padding-top: .4rem; }
+  .daily-completed .daily-stats span,
+  .daily-completed .daily-stats small { font-size: .8rem; }
+  .daily-completed .daily-stats strong { font-size: 1.5rem; }
 }
