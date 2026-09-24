@@ -459,6 +459,20 @@ a:focus-visible {
   padding-block: clamp(0.7rem, 1.8vh, 1.25rem);
 }
 
+.hero.hero-playing {
+  overflow: hidden;
+}
+
+.hero-playing .play-card {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.hero-playing .round-photo {
+  min-height: 0;
+}
+
 .hero-playing .time-orbit,
 .hero-summary .time-orbit {
   opacity: 0.24;
@@ -1938,6 +1952,7 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 
 .daily-completed .answer-panel {
   align-items: stretch;
+  justify-content: space-evenly;
   gap: .65rem;
   padding: clamp(.75rem, 1.6vw, 1.25rem);
 }
@@ -2017,7 +2032,7 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
   .daily-completed .answer-panel {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(12rem, .85fr);
-    align-content: center;
+    align-content: space-evenly;
     align-items: center;
     gap: .65rem 1rem;
   }
@@ -2059,6 +2074,18 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
 }
 
 @media (min-width: 75rem) and (min-height: 50rem) {
+  .daily-completed .answer-panel {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: clamp(.75rem, 2vh, 1.5rem) 1.2rem;
+    padding: clamp(1rem, 2vh, 1.5rem);
+  }
+  .daily-completed .photo-information h2 { padding: .75rem 1rem; }
+  .daily-completed .photo-information dl > div { padding: .8rem 1rem .9rem; }
+  .daily-completed .analog-clock { width: min(18rem, 28vh); container-type: inline-size; }
+  .daily-completed .clock-numbers > span { transform: rotate(var(--number-angle)) translateY(-35cqw) rotate(calc(-1 * var(--number-angle))) !important; }
+  .daily-completed .round-result { padding: clamp(1rem, 3vh, 2rem) 1.15rem; }
+  .daily-completed .daily-ranking { padding: clamp(1rem, 2vh, 1.5rem); }
+
   .play-card:not(.daily-completed) .answer-panel {
     align-content: space-evenly;
     gap: .7rem 1.2rem;
@@ -2121,7 +2148,7 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid
   .play-card:not(.daily-completed) .answer-panel { gap: .5rem; padding: .65rem; }
   .play-card:not(.daily-completed) .analog-clock { width: 15rem; }
   .daily-completed.play-card { grid-template-columns: minmax(0, .9fr) minmax(31rem, 1.15fr); }
-  .daily-completed .answer-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); grid-template-areas: "info info" "feedback clock" "ranking tomorrow"; align-content: center; gap: .5rem; padding: .6rem; }
+  .daily-completed .answer-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); grid-template-areas: "info info" "feedback clock" "ranking tomorrow"; align-content: space-evenly; gap: .5rem; padding: .6rem; }
   .daily-completed .photo-information { grid-area: info; }
   .daily-completed .daily-feedback { grid-area: feedback; }
   .daily-completed .analog-clock { grid-area: clock; justify-self: center; width: 11rem; }
